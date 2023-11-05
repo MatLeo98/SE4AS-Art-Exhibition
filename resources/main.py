@@ -1,6 +1,5 @@
 import time
 import paho.mqtt.client as mqtt
-# import tenacity
 
 from Artwork import Artwork
 from Room import Room

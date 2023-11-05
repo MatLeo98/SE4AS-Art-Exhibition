@@ -1,10 +1,10 @@
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
-from tenacity import *
+#from tenacity import *
 
 class ModeDefinition:
     # method that stores the modes inside the knowledge (influxdb)
-    @retry()
+    # @retry()
     def storeModes(self, rooms : list):
         # influxdb connection
         bucket = "seas"

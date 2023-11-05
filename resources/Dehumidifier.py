@@ -1,12 +1,12 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-from tenacity import retry
+# from tenacity import retry
 
 class Dehumidifier:
-    @retry()
+    # @retry()
     def __init__(self, room):
         self.room = room
-        self.client = mqtt.Client(client_id=f"Dehumidifier_{room.artworkName}")
+        self.client = mqtt.Client(client_id=f"Dehumidifier_{room.name}")
         thread = Thread(target=self.initialize_mqtt)
         thread.start()
 
@@ -27,7 +27,7 @@ class Dehumidifier:
         room_name = topic_split[1]
         condition = topic_split[2]
 
-        if room_name == self.room.artworkName:
+        if room_name == self.room.name:
             if condition == 'up':
                 self.increaseHumidity()
             else:

@@ -1,14 +1,14 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-from tenacity import retry
+#from tenacity import retry
 
 
 class SmokeDetector:
 
-    @retry()
+    # @retry()
     def __init__(self, room):
         self.room = room
-        self.client = mqtt.Client(client_id=f"SmokeDetector_{room.roomName}")
+        self.client = mqtt.Client(client_id=f"SmokeDetector_{room.name}")
         self.client.connect("localhost", 1883)
         self.thread = Thread(target=self.initialize_mqtt)
         self.thread.start()
@@ -28,7 +28,7 @@ class SmokeDetector:
         room_name = topic_split[1]
         condition = topic_split[2]
 
-        if room_name == self.room.roomName:
+        if room_name == self.room.name:
             if condition == 'danger':
                 self.room.smokeAlarm.activated = True
             else:

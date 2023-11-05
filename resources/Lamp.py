@@ -1,13 +1,13 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-from tenacity import retry
+# from tenacity import retry
 
 class Lamp:
 
-    @retry()
+    # @retry()
     def __init__(self, artwork):
         self.artwork = artwork
-        self.client = mqtt.Client(client_id=f"Lamp_{artwork.artworkName}")
+        self.client = mqtt.Client(client_id=f"Lamp_{artwork.name}")
         thread = Thread(target=self.initialize_mqtt)
         thread.start()
 
@@ -28,7 +28,7 @@ class Lamp:
         room_name = topic_split[1]
         condition = topic_split[2]
 
-        if room_name == self.artwork.artworkName:
+        if room_name == self.artwork.name:
             if condition == 'up':
                 self.increaseLight()
             else:
