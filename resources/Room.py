@@ -8,9 +8,11 @@ class Room:
     name = ""
     temperature = 30
 
-    def __init__(self, name: str, temperature: int):
+    def __init__(self, name: str, temperature: int, humidity: int, air: int):
         self.name = name
         self.temperature = temperature
+        self.humidity = humidity
+        self.air = air
         self.sensors = [Conditioner.Conditioner(self),
                         Dehumidifier.Dehumidifier(self),
                         SmokeDetector.SmokeDetector(self)]
@@ -18,9 +20,14 @@ class Room:
 
     def simulate(self, client: Client):
         rand = random.randint(0, 9)
+        #TODO: DA RANDOMIZZARE MEGLIO
         if rand == 0:
             self.temperature = self.temperature + randint(-1, 1)
+            self.humidity = self.humidity + randint(-1, 1)
+            self.air = self.air + randint(-1, 1)
 
         client.publish(f"rooms/{self.name}/temperature", self.temperature)
+        client.publish(f"rooms/{self.name}/humidity", self.humidity)
+        client.publish(f"rooms/{self.name}/air", self.air)
 
         print(f'Publishing simulated data for room {self.name}')

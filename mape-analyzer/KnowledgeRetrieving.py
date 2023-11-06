@@ -31,6 +31,53 @@ def get_artworks_name() -> list:
     return artworks
 
 
+def get_artwork_mean_light(artwork):
+    query = f'from(bucket: "artexhibition") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) ' \
+            f'|> filter(fn: (r) => r["_measurement"] == "artworks")' \
+            f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
+            f'|> filter(fn: (r) => r["_field"] == "light") ' \
+            f'|> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false) ' \
+            f'|> yield(name: "mean")'
+    result = client.query_api().query(org=org, query=query)
+    result = json.loads(result.to_json())[0]['_value']
+    return result
+
+def get_artwork_current_light(artwork):
+    query = f'from(bucket: "artexhibition") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) ' \
+            f'|> filter(fn: (r) => r["_measurement"] == "artworks")' \
+            f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
+            f'|> filter(fn: (r) => r["_field"] == "light") ' \
+            f'|> last() ' \
+            f'|> yield(name: "last_value")'
+    result = client.query_api().query(org=org, query=query)
+    result = json.loads(result.to_json())[0]['_value']
+    return result
+
+def get_room_mean(room, field): #field can be temperature, light, humidity or smoke
+    query = f'from(bucket: "artexhibition") ' \
+            f'|> range(start: v.timeRangeStart, stop: v.timeRangeStop) ' \
+            f'|> filter(fn: (r) => r["_measurement"] == "rooms") ' \
+            f'|> filter(fn: (r) => r["room"] == "{room}") ' \
+            f'|> filter(fn: (r) => r["_field"] == "{field}") ' \
+            f'|> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false) ' \
+            f'|> yield(name: "mean")'
+    result = client.query_api().query(org=org, query=query)
+    result = json.loads(result.to_json())[0]['_value']
+    return result
+
+def get_room_current(room, field):
+    query = f'from(bucket: "artexhibition") ' \
+            f'|> filter(fn: (r) => r["_measurement"] == "rooms") ' \
+            f'|> filter(fn: (r) => r["room"] == "{room}") ' \
+            f'|> filter(fn: (r) => r["_field"] == "{field}") ' \
+            f'|> last() ' \
+            f'|> yield(name: "last_value")'
+    result = client.query_api().query(org=org, query=query)
+    result = json.loads(result.to_json())[0]['_value']
+    return result
+
+#TODO: MANCA LA SMOKE, DA DISCUTERE PERCHè PENSO SIA TRUE FALSE
+
 def getParametersDataFromDB(room, measurement):
     query = f'from(bucket: "seas") |> range(start: -5m)  |> filter(fn: (r) => r["_measurement"] == "indoor")  ' \
             f'|> filter(fn: (r) => r["room"] == "{room}")  |> filter(fn: (r) => r["_field"] == "{measurement}")  ' \
@@ -40,6 +87,8 @@ def getParametersDataFromDB(room, measurement):
     for value in json.loads(result.to_json()):
         values[value['_time']] = value['_value']
     return values
+
+
 
 
 def getPresenceDataFromDB(room):
@@ -99,7 +148,7 @@ def getAllRangesForModes():
     modes = mode_file.json()['modes']
     return modes
 
-# Da qui in giù forse va tolto, nel nostro caso non serve
+#TODO: Da qui in giù forse va tolto, nel nostro caso non serve
 def storeTimeSlots(timeSlot: tuple, room: str):
     # influxdb connection
     bucket = "seas"

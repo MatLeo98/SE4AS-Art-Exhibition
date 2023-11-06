@@ -9,7 +9,8 @@ class SmokeDetector:
     def __init__(self, room):
         self.room = room
         self.client = mqtt.Client(client_id=f"SmokeDetector_{room.name}")
-        self.client.connect("localhost", 1883)
+        self.client.connect("173.20.0.100", 1883)
+        #self.client.connect("localhost", 1883)
         self.thread = Thread(target=self.initialize_mqtt)
         self.thread.start()
 
