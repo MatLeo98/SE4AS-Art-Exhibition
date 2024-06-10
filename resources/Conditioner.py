@@ -1,15 +1,13 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-# from tenacity import retry
+
 
 class Conditioner:
 
-    # @retry()
     def __init__(self, room):
         self.room = room
         self.client = mqtt.Client(client_id=f"Conditioner_{room.name}")
-        self.client.connect("173.20.0.100", 1883)
-        #self.client.connect("localhost", 1883)
+        self.client.connect("localhost", 1884)
         self.thread = Thread(target=self.initialize_mqtt)
         self.thread.start()
 
@@ -20,7 +18,6 @@ class Conditioner:
 
     def on_connect(self, client, userdata, flags, rc):
         self.client.subscribe("conditioner/#")
-
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8")
@@ -34,6 +31,7 @@ class Conditioner:
                 self.increaseTemperature()
             else:
                 self.decreaseTemperature()
+
     def increaseTemperature(self):
         self.room.temperature = self.room.temperature + 1
 

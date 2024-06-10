@@ -1,0 +1,12 @@
+{
+"mode": {
+    "normal": 1,
+    "eco": 5,
+    "danger": 15
+    },
+"target": {
+    "temperature": 20,
+    "light": 180,
+    "humidity": 50
+    }
+}

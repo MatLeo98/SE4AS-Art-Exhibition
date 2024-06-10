@@ -1,12 +1,19 @@
 import random
 from random import randint
+
 from paho.mqtt.client import Client
-import Conditioner, Dehumidifier, SmokeDetector, SmokeAlarm
+
+import Conditioner
+import Dehumidifier
+import SmokeAlarm
+import SmokeDetector
 
 
 class Room:
     name = ""
-    temperature = 30
+    temperature = 0
+    humidity = 0
+    air = 0
 
     def __init__(self, name: str, temperature: int, humidity: int, air: int):
         self.name = name
@@ -26,8 +33,8 @@ class Room:
             self.humidity = self.humidity + randint(-1, 1)
             self.air = self.air + randint(-1, 1)
 
-        client.publish(f"rooms/{self.name}/temperature", self.temperature)
-        client.publish(f"rooms/{self.name}/humidity", self.humidity)
-        client.publish(f"rooms/{self.name}/air", self.air)
+        client.publish(f"rooms/{self.name}/temperature/value", self.temperature)
+        client.publish(f"rooms/{self.name}/humidity/value", self.humidity)
+        client.publish(f"rooms/{self.name}/air/value", self.air)
 
-        print(f'Publishing simulated data for room {self.name}')
+        print(f'Publishing data for {self.name}')

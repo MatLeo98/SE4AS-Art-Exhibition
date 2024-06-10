@@ -9,10 +9,10 @@ services:
     restart: always
     networks:
       seas_network:
-        ipv4_address: 173.20.0.100
+        ipv4_address: 175.20.0.100
     ports:
-      - '1883:1883'
-      - '9001:9001'
+      - '1884:1884'
+      - '9002:9002'
 
   resources:
     image: magiteam/resources
@@ -23,7 +23,7 @@ services:
     restart: always
     networks:
       seas_network:
-        ipv4_address: 173.20.0.101
+        ipv4_address: 175.20.0.101
     depends_on:
       - mqtt-broker
 
@@ -36,13 +36,13 @@ services:
     restart: always
     networks:
       seas_network:
-        ipv4_address: 173.20.0.103
+        ipv4_address: 175.20.0.102
     depends_on:
       - mqtt-broker
 
-  mape-knowloedge:
+  mape-knowledge:
     image: influxdb:latest
-    container_name: mape-knowloedge
+    container_name: mape-knowledge
     restart: always
     environment:
               - DOCKER_INFLUXDB_INIT_MODE=setup
@@ -53,7 +53,7 @@ services:
               - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=4qYRM7usBFEuc3Gxd01lC6Gpiohdwv4DWZ39xjhERohSKddjcpVdlDCzP6aCu8oT
     networks:
        seas_network:
-          ipv4_address: 173.20.0.102
+          ipv4_address: 175.20.0.103
     ports:
       - '8086:8086'
       
@@ -61,4 +61,4 @@ networks:
   seas_network:
     ipam:
       config:
-        - subnet: '173.20.0.0/16'
+        - subnet: '175.20.0.0/20'

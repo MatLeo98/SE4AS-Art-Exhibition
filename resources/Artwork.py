@@ -7,7 +7,6 @@ import Lamp
 class Artwork:
     name = ""
     light = 0
-    humidity = 0
 
     def __init__(self, name: str, light: int, room: str):
         self.name = name
@@ -20,6 +19,6 @@ class Artwork:
         if rand == 0:
             self.light = self.light + randint(-1, 1)
 
-        client.publish(f"artworks/{self.name}/light", self.light)
+        client.publish(f"artworks/{self.name}/light/value", self.light)
 
-        print(f'Publishing simulated data for artwork {self.name}')
+        print(f'Publishing data for {self.name}')

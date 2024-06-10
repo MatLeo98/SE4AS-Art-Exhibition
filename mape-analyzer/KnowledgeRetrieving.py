@@ -12,22 +12,33 @@ url = "http://173.20.0.102:8086/"
 # url = "http://localhost:8086/"
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
 
+def query_executor(query):
+    return client.query_api().query(org=org, query=query)
 
-def get_rooms_name() -> list:
-    query = f'import "influxdata/influxdb/schema" schema.tagValues(bucket: "artexhibition", tag: "room")'
-    names = client.query_api().query(org=org, query=query)
+def get_rooms_name():
+    query = 'from(bucket: "artexhibition") |> range(start: -30d) |> filter(fn: (r) => r["_measurement"] == "rooms") |> group(columns: ["room"]) |> distinct(column: "_value")'
+    r = query_executor(query)
+
     rooms = []
-    for element in names.to_values():
-        rooms.append(list(element)[2])
+    for element in r.to_values():
+        value = list(element)[4]
+        if value is not None and value not in rooms:
+            rooms.append(value)
+    print("rooms: ", rooms)
     return rooms
 
 
-def get_artworks_name() -> list:
-    query = f'import "influxdata/influxdb/schema" schema.tagValues(bucket: "artexhibition", tag: "artwork")'
-    names = client.query_api().query(org=org, query=query)
+def get_artworks_name():
+    query = ('from(bucket: "artexhibition") |> range(start: -30d) |> filter(fn: (r) => r["_measurement"] == '
+             '"artworks") |> group(columns: ["artwork"]) |> distinct(column: "_value")')
+    art = query_executor(query)
+
     artworks = []
-    for element in names.to_values():
-        artworks.append(list(element)[2])
+    for element in art.to_values():
+        value = list(element)[4]
+        if value is not None and value not in artworks:
+            artworks.append(value)
+    print("artworks: ", artworks)
     return artworks
 
 
@@ -89,8 +100,6 @@ def getParametersDataFromDB(room, measurement):
     return values
 
 
-
-
 def getPresenceDataFromDB(room):
     # influxdb connection
     org = "univaq"
@@ -110,7 +119,7 @@ def getPresenceDataFromDB(room):
     return values
 
 
-def getTargetRoomParameter(measurement):
+def getTargetRoomParameter(measurement): #METODO PER PRENDERSI DA CONFIG LE SOGLIE IMPOSTATE DALL'UTENTE
     url = f'http://173.20.0.108:5008/config/targets/{measurement}'
     response = requests.get(url)
     target = response.json()['data']
@@ -148,48 +157,64 @@ def getAllRangesForModes():
     modes = mode_file.json()['modes']
     return modes
 
-#TODO: Da qui in giù forse va tolto, nel nostro caso non serve
-def storeTimeSlots(timeSlot: tuple, room: str):
-    # influxdb connection
-    bucket = "seas"
-    org = "univaq"
-    token = "seasinfluxdbtoken"
-    # url = "http://localhost:8086/"
-    url = "http://173.20.0.102:8086/"
-    client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
-    write_api = client.write_api(write_options=SYNCHRONOUS)
-    measurement = "timeSlot"
-    tag = room
-    field = timeSlot[0]
-    value = timeSlot[1]
-    # print(f'Field: {field} - Value: {int(value)}')
-    p = influxdb_client.Point(measurement).tag('room', tag).field(field, int(value))
-    write_api.write(bucket=bucket, org=org, record=p)
-
-
-def get_room_time_slots(room: str, timeslot: str):
+def getRoomTemperatureData(room):
     query_api = client.query_api()
-    query = f'from(bucket: "seas")  |> range(start: -1d)  ' \
-            f'|> filter(fn: (r) => r["_measurement"] == "timeSlot")  ' \
-            f'|> filter(fn: (r) => r["room"] == "{room}")  ' \
-            f'|> filter(fn: (r) => r["_field"] == "{timeslot}")  ' \
-            f'|> last(column: "_field")  |> yield(name: "mean")'
+    query = f'from(bucket: "artexhibition")  |> range(start: 2023-01-01T15:00:00Z)  ' \
+            f'|> filter(fn: (r) => r["_measurement"] == "rooms")  |> filter(fn: (r) => r["room"] == "{room}")  ' \
+            f'|> filter(fn: (r) => r["_field"] == "temperature")  |> last(column: "_field")  ' \
+            f'|> yield(name: "mean")'
     result = query_api.query(org=org, query=query)
-    parsed = json.loads(result.to_json())
-    return parsed[0]['_value']
+    result = json.loads(result.to_json())[0]['_value']
+    print("result: ", result)
+    return result
 
 
-def get_room_presence(room):
-    query = f'from(bucket: "seas") \
-                |> range(start: -15m) \
-                |> filter(fn: (r) => r["_measurement"] == "indoor") \
-                |> filter(fn: (r) => r["_field"] == "movement") \
-                |> filter(fn: (r) => r["room"] == "{room}") \
-                |> sort(columns: ["_time"], desc: true) \
-                |> first()'
-    result = client.query_api().query(org=org, query=query)
-    parsed = json.loads(result.to_json())
-    return parsed[0]['_value']
 
-# if __name__ == '__main__':
-#    DB_Connection.getTargetRoomParameter("temperature")
+# Da qui in giù forse va tolto, nel nostro caso non serve
+# def storeTimeSlots(timeSlot: tuple, room: str):
+#     # influxdb connection
+#     bucket = "seas"
+#     org = "univaq"
+#     token = "seasinfluxdbtoken"
+#     # url = "http://localhost:8086/"
+#     url = "http://173.20.0.102:8086/"
+#     client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+#     write_api = client.write_api(write_options=SYNCHRONOUS)
+#     measurement = "timeSlot"
+#     tag = room
+#     field = timeSlot[0]
+#     value = timeSlot[1]
+#     # print(f'Field: {field} - Value: {int(value)}')
+#     p = influxdb_client.Point(measurement).tag('room', tag).field(field, int(value))
+#     write_api.write(bucket=bucket, org=org, record=p)
+
+
+# def get_room_time_slots(room: str, timeslot: str):
+#     query_api = client.query_api()
+#     query = f'from(bucket: "seas")  |> range(start: -1d)  ' \
+#             f'|> filter(fn: (r) => r["_measurement"] == "timeSlot")  ' \
+#             f'|> filter(fn: (r) => r["room"] == "{room}")  ' \
+#             f'|> filter(fn: (r) => r["_field"] == "{timeslot}")  ' \
+#             f'|> last(column: "_field")  |> yield(name: "mean")'
+#     result = query_api.query(org=org, query=query)
+#     parsed = json.loads(result.to_json())
+#     return parsed[0]['_value']
+
+
+# def get_room_presence(room):
+#     query = f'from(bucket: "seas") \
+#                 |> range(start: -15m) \
+#                 |> filter(fn: (r) => r["_measurement"] == "indoor") \
+#                 |> filter(fn: (r) => r["_field"] == "movement") \
+#                 |> filter(fn: (r) => r["room"] == "{room}") \
+#                 |> sort(columns: ["_time"], desc: true) \
+#                 |> first()'
+#     result = client.query_api().query(org=org, query=query)
+#     parsed = json.loads(result.to_json())
+#     return parsed[0]['_value']
+
+if __name__ == '__main__':
+    # get_artworks_db('Guernica')
+    # get_artworks_name()
+    # get_rooms_name()
+    getRoomTemperatureData('room1')

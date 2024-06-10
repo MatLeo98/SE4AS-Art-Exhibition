@@ -7,9 +7,9 @@ from Room import Room
 
 def main():
     # MQTT client creation
-    client = mqtt.Client("ManagedResource", reconnect_on_failure=True)
-    #client.connect("localhost", 1883) #works on IDE
-    client.connect("173.20.0.100", port=1883) #works with docker
+    client = mqtt.Client("resources", reconnect_on_failure=True)
+    client.connect("localhost", 1884)
+    # client.connect("173.20.0.100", port=1884)
 
     # room creation
     rooms = []

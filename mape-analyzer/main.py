@@ -31,7 +31,7 @@ def main():
             room_values = {}
             for measurement in measurements:
                 # returns {time : value} of the measurement
-                value = KnowledgeRetrieving.getParametersDataFromDB(room, measurement)
+                value = KnowledgeRetrieving.get_parameters_db(room, measurement) # CAMBIATO IN get_artworks_db
                 room_values[measurement] = value
 
             parameters_data[room] = room_values
