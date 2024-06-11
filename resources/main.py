@@ -16,6 +16,7 @@ def main():
     artworks = []
 
     #TODO: DA CAPIRE COSA FARE CON SMOKE
+    #TODO: todo
 
     room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10)
     rooms.append(room1)
