@@ -10,7 +10,9 @@ import requests
 def main():
     try:
         rooms = KnowledgeRetrieving.get_rooms_name()
-        measurements = ["humidity", "temperature", "light", "air"]
+        artworks = KnowledgeRetrieving.get_artworks_name()
+        rooms_measurements = ["humidity", "temperature", "air"]
+        artworks_measurement = "light"
         parameters_data = {}
         presence_data = {}
 
@@ -67,53 +69,66 @@ def check_parameters_symptoms(data):
 
                 print(
                     f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
-                if mode == 'eco' or mode == 'normal':
-                    if actual_value > target + interval:  # se misura è maggiore del range della mode attuale
-                        if actual_value < target + int(ranges['danger']):  # se misura è nel range della danger
-                            values[measurement] = 1
-                            print('Simply decrease')
-                        else:
-                            if measurement == 'temperature':
-                                values[measurement] = 2
-                                print('Danger, decrease and set mode to danger')
-                            else:
-                                values[measurement] = 1
-                                print('Simply decrease')
-                    elif actual_value < target - interval:  # se misura è minore del range della mode attuale
-                        if actual_value > target - int(ranges['danger']):  # se misura è nel range della danger
-                            values[measurement] = -1
-                            print('Simply increase')
-                        else:
-                            if measurement == 'temperature':
-                                values[measurement] = -2
-                                print('Danger, increase and set mode to danger')
-                            else:
-                                values[measurement] = -1
-                                print('Simply increase')
-                elif mode == 'danger':
-                    if measurement == "temperature":
-                        if actual_value > target + int(ranges['danger']):  # se misura è superiore al range della danger
-                            print('Danger active, simply decrease')
-                            values[measurement] = 1
-                        elif actual_value < target - int(
-                                ranges['danger']):  # se misura è superiore al range della danger
-                            print('Danger active, simply increase')
-                            values[measurement] = -1
-                        elif actual_value < target + int(ranges['danger']) and actual_value > target - int(
-                                ranges['danger']):
-                            print('No more danger, deactivate alarm and set mode to eco')
-                            values[measurement] = 3
-                    else:
-                        if actual_value > target + interval:  # se misura è maggiore del range della mode attuale
-                            values[measurement] = 1
-                            print('Simply decrease')
-                        elif actual_value < target - interval:  # se misura è minore del range della mode attuale
-                            values[measurement] = -1
-                            print('Simply increase')
+
+                process_measurement(mode, actual_value, target, interval, ranges, values, measurement)
 
         rooms[room] = values
     return rooms
 
+
+def process_measurement(mode, actual_value, target, interval, ranges, values, measurement):
+    def simply_decrease():
+        values[measurement] = 1
+        print('Simply decrease')
+
+    def simply_increase():
+        values[measurement] = -1
+        print('Simply increase')
+
+    def danger_decrease():
+        values[measurement] = 2
+        print('Danger, decrease and set mode to danger')
+
+    def danger_increase():
+        values[measurement] = -2
+        print('Danger, increase and set mode to danger')
+
+    def no_more_danger():
+        values[measurement] = 3
+        print('No more danger, deactivate alarm and set mode to eco')
+
+    if mode in ['eco', 'normal']:
+        if actual_value > target + interval:
+            if actual_value < target + int(ranges['danger']):
+                simply_decrease()
+            else:
+                if measurement == 'temperature':
+                    danger_decrease()
+                else:
+                    simply_decrease()
+        elif actual_value < target - interval:
+            if actual_value > target - int(ranges['danger']):
+                simply_increase()
+            else:
+                if measurement == 'temperature':
+                    danger_increase()
+                else:
+                    simply_increase()
+    elif mode == 'danger':
+        if measurement == "temperature":
+            if actual_value > target + int(ranges['danger']):
+                print('Danger active, simply decrease')
+                values[measurement] = 1
+            elif actual_value < target - int(ranges['danger']):
+                print('Danger active, simply increase')
+                values[measurement] = -1
+            elif target - int(ranges['danger']) <= actual_value <= target + int(ranges['danger']):
+                no_more_danger()
+        else:
+            if actual_value > target + interval:
+                simply_decrease()
+            elif actual_value < target - interval:
+                simply_increase()
 
 @retry()
 def check_busy_time_slot(room):

@@ -17,13 +17,13 @@ def main():
 
     #TODO: DA CAPIRE COSA FARE CON SMOKE
 
-    room1 = Room(name="room1", temperature=22, humidity=50, air=30)
+    room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10)
     rooms.append(room1)
-    room2 = Room(name="room2", temperature=20, humidity=52, air=21)
+    room2 = Room(name="room2", temperature=20, humidity=52, air=21, people=10)
     rooms.append(room2)
-    room3 = Room(name="room3", temperature=22, humidity=35, air=15)
+    room3 = Room(name="room3", temperature=22, humidity=35, air=15, people=10)
     rooms.append(room3)
-    room4 = Room(name="room4", temperature=27, humidity=51, air=46)
+    room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10)
     rooms.append(room4)
 
     gioconda = Artwork(name="Gioconda", light=30, room="room1")
