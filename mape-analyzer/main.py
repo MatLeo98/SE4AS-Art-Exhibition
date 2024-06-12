@@ -1,5 +1,5 @@
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 import numpy
 from tenacity import retry
@@ -10,9 +10,9 @@ import requests
 def main():
     try:
         rooms = KnowledgeRetrieving.get_rooms_name()
-        artworks = KnowledgeRetrieving.get_artworks_name()
+
         rooms_measurements = ["humidity", "temperature", "air"]
-        artworks_measurement = "light"
+
         parameters_data = {}
         presence_data = {}
 
@@ -20,28 +20,54 @@ def main():
             timeSlots = check_busy_time_slot(room)
             for timeSlot in timeSlots.items():
                 KnowledgeRetrieving.storeTimeSlots(timeSlot, room)
-            presence = check_presence(room)
-            if presence != 0:
-                presence_data[room] = presence
+            people = check_people(room)
+
+            presence_data[room] = people
+        print("presence_Data:")
+        print(presence_data)
 
         # url = 'http://localhost:5007/planner/presence'
-        url = 'http://173.20.0.105:5007/planner/presence'
-        x = requests.post(url, json=presence_data)
+        # url = 'http://173.20.0.105:5007/planner/presence'
+        # x = requests.post(url, json=presence_data)
 
         # dictionary of data are organized in this way {room : {measurement : {time : value}}}
         for room in rooms:
             room_values = {}
-            for measurement in measurements:
+            for measurement in rooms_measurements:
                 # returns {time : value} of the measurement
-                value = KnowledgeRetrieving.get_parameters_db(room, measurement) # CAMBIATO IN get_artworks_db
+                value = KnowledgeRetrieving.get_room_current(room, measurement)
                 room_values[measurement] = value
 
             parameters_data[room] = room_values
 
+        print("parameters_data:")
+        print(parameters_data)
+
         symptoms = check_parameters_symptoms(parameters_data)
+        print("symptoms:")
+        print(symptoms)
         # url = 'http://localhost:5007/planner/symptoms'
-        url = 'http://173.20.0.105:5007/planner/symptoms'
-        x = requests.post(url, json=symptoms)
+        # url = 'http://173.20.0.105:5007/planner/symptoms'
+        # x = requests.post(url, json=symptoms)
+
+        # artworks = KnowledgeRetrieving.get_artworks_name()
+        # artworks_measurement = "light"
+        # light_data = {}
+        #
+        # for artwork in artworks:
+        #     artwork_values = {}
+        #
+        #     # returns {time : value} of the measurement
+        #     value = KnowledgeRetrieving.get_artwork_current_light(artwork)
+        #     artwork_values["light"] = value
+        #
+        #     light_data[artwork] = artwork_values
+        #
+        # artwork_symptoms = check_parameters_symptoms(light_data)
+        # # url = 'http://localhost:5007/planner/symptoms'
+        # url = 'http://173.20.0.105:5007/planner/symptoms'
+        # x = requests.post(url, json=symptoms)
+
 
     except Exception as exc:
         traceback.print_exc()
@@ -50,14 +76,14 @@ def main():
 # calulate the mean of the last 5 minutes for each measured parameter (except the movement) and finds the symptoms
 def check_parameters_symptoms(data):
     rooms = {}
-    ranges = KnowledgeRetrieving.getAllRangesForModes()
+    ranges = KnowledgeRetrieving.get_all_modes_ranges()
     for room in data:
         values = {}
-        interval = int(KnowledgeRetrieving.getRangeRoom(room=room))
-        mode = KnowledgeRetrieving.getModeRoom(room)
+        interval = int(KnowledgeRetrieving.get_range(room=room))
+        mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
-            if measurement != "movement":
-                target = int(KnowledgeRetrieving.getTargetRoomParameter(measurement=measurement))
+            if measurement != "people":
+                target = int(KnowledgeRetrieving.get_target_parameter(measurement=measurement))
                 actual_value = numpy.mean(list(data[room][measurement].values()))
 
                 # 2 means to increase the value and set mode to danger
@@ -75,6 +101,31 @@ def check_parameters_symptoms(data):
         rooms[room] = values
     return rooms
 
+# def check_artwork_symptoms(data):
+#     artworks = {}
+#     ranges = KnowledgeRetrieving.get_all_modes_ranges()
+#     for room in data:
+#         values = {}
+#         interval = int(KnowledgeRetrieving.get_artwork_light_range(artwork=artwork))
+#         mode = KnowledgeRetrieving.get_room_mode(room)
+#         for light in data[room]:
+#                 target = int(KnowledgeRetrieving.get_target_parameter(measurement"light"))
+#                 actual_value = numpy.mean(list(data[room]["light"].values()))
+#
+#                 # 2 means to increase the value and set mode to danger
+#                 # 1 means to increase the value
+#                 # 0 don't do anything
+#                 # -1 means to decrease the value
+#                 # -2 means to decrease the value and set mode to danger
+#                 # 3 means to deactivate alarm and set mode to eco
+#
+#                 print(
+#                     f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
+#
+#                 process_measurement(mode, actual_value, target, interval, ranges, values, measurement)
+#
+#         rooms[room] = values
+#     return rooms
 
 def process_measurement(mode, actual_value, target, interval, ranges, values, measurement):
     def simply_decrease():
@@ -102,97 +153,94 @@ def process_measurement(mode, actual_value, target, interval, ranges, values, me
             if actual_value < target + int(ranges['danger']):
                 simply_decrease()
             else:
-                if measurement == 'temperature':
-                    danger_decrease()
-                else:
-                    simply_decrease()
+                danger_decrease()
+
         elif actual_value < target - interval:
             if actual_value > target - int(ranges['danger']):
                 simply_increase()
             else:
-                if measurement == 'temperature':
-                    danger_increase()
-                else:
-                    simply_increase()
+                danger_increase()
     elif mode == 'danger':
-        if measurement == "temperature":
-            if actual_value > target + int(ranges['danger']):
-                print('Danger active, simply decrease')
-                values[measurement] = 1
-            elif actual_value < target - int(ranges['danger']):
-                print('Danger active, simply increase')
-                values[measurement] = -1
-            elif target - int(ranges['danger']) <= actual_value <= target + int(ranges['danger']):
-                no_more_danger()
-        else:
-            if actual_value > target + interval:
-                simply_decrease()
-            elif actual_value < target - interval:
-                simply_increase()
+        if actual_value > target + int(ranges['danger']):
+            print('Danger active, simply decrease')
+            values[measurement] = 1
+        elif actual_value < target - int(ranges['danger']):
+            print('Danger active, simply increase')
+            values[measurement] = -1
+        elif target - int(ranges['danger']) <= actual_value <= target + int(ranges['danger']):
+            no_more_danger()
+
 
 @retry()
 def check_busy_time_slot(room):
-    rooms = KnowledgeRetrieving.get_rooms_name()
     datas = []
-    data = KnowledgeRetrieving.getPresenceDataFromDB(room)
+    data = KnowledgeRetrieving.get_people_from_db(room)
     for element in data.items():
         datas.append(element)
 
     parsed_time = dict()
     for element in datas:
-        time_string = element[0].split('T')
-        time_string = time_string[1]
-        time_string = time_string.split('.')
-        time_string = time_string[0]
-
+        time_string = element[0].split('T')[1].split('.')[0]
         date_obj = datetime.strptime(time_string, '%H:%M:%S')
         parsed_time[str(date_obj.time())] = element[1]
 
     fasce_orarie = dict()
-    for hour in range(0, 24):
-        for quarter in [('00', '14'), ('15', '29'), ('30', '44'), ('45', '59')]:
-            parsed = list()
-            for record in parsed_time.items():
-                date_obj = datetime.strptime(record[0], '%H:%M:%S')
-                if date_obj.hour == hour and (date_obj.minute > int(quarter[0]) and date_obj.minute < int(quarter[1])):
-                    parsed.append(record[1])
-                else:
-                    parsed.append(0)
+    for hour in range(8, 20, 2):
+        parsed = []
+        start_time = datetime.strptime(f'{hour}:00:00', '%H:%M:%S')
+        end_time = start_time + timedelta(hours=2)
+        for record in parsed_time.items():
+            record_time = datetime.strptime(record[0], '%H:%M:%S')
+            if start_time <= record_time < end_time:
+                parsed.append(record[1])
+        value = 0  # Non affollato
+        if parsed:  # Only calculate the mean if there are records in this time slot
             mean = numpy.mean(parsed)
-            if mean >= 0.5:
-                fasce_orarie[f'{hour}:{quarter[0]} - {hour}:{quarter[1]}'] = 1
-            else:
-                fasce_orarie[f'{hour}:{quarter[0]} - {hour}:{quarter[1]}'] = 0
+            if mean >= 10 & mean < 20:
+                value = 1  # Normal situation
+            elif mean >= 20:
+                value = 2  # Overpopulated
+        fasce_orarie[f'{start_time.time().strftime("%H:%M")} - {end_time.time().strftime("%H:%M")}'] = value
     return fasce_orarie
 
 
-def check_presence(room: str):
+def check_people(room: str):
     mode = KnowledgeRetrieving.getModeRoom(room)
     utcnow = datetime.utcnow()
-    current_time = utcnow.strftime("%H:%M").split(":")
+    current_hour = utcnow.hour
 
-    if current_time[0] != "00":
-        current_time[0] = str(int(current_time[0]))
-    else:
-        current_time[0] = "0"
+    # Check if current hour is between 8:00 - 20:00
+    if 8 <= current_hour < 20:
+        # Adjust hour to the nearest even number for 2-hour time slots
+        if current_hour % 2 != 0:
+            current_hour -= 1
 
-    for quarter in [('00', '14'), ('15', '29'), ('30', '44'), ('45', '59')]:
-        if current_time[1] >= quarter[0] and current_time[1] <= quarter[1]:
+        time_slot_start = datetime.strptime(f'{current_hour}:00:00', '%H:%M:%S')
+        time_slot_end = time_slot_start + timedelta(hours=2)
+        time_slot = f'{time_slot_start.strftime("%H:%M")} - {time_slot_end.strftime("%H:%M")}'
 
-            # time_slot = f'{current_time[0]}:{quarter[0]} - {current_time[0]}:{quarter[1]}'
+        value = KnowledgeRetrieving.get_room_people(room)
 
-            # value = con.get_room_time_slots(room, time_slot)
-            value = KnowledgeRetrieving.get_room_presence(room)
-            # print(value)
+        if value < 10:
+            new_mode = 0  # eco
+        elif 10 <= value <= 20:
+            new_mode = 1  # normal
+        else:
+            new_mode = 2  # power
 
-            if mode == 'normal' and value == 0:
+        if mode != new_mode:
+            if new_mode == 0:
                 print(f'{room}: set mode to eco')
-                return 1
-            if mode == 'eco' and value == 1:
+            elif new_mode == 1:
                 print(f'{room}: set mode to normal')
-                return 2
+            elif new_mode == 2:
+                print(f'{room}: set mode to power')
+            return new_mode
+        else:
+            return mode
 
-            return 0
+    # Se l'ora corrente non è tra le 8 e le 20, setta ad eco perché il museo è chiuso
+    return 0
 
 
 if __name__ == "__main__":
