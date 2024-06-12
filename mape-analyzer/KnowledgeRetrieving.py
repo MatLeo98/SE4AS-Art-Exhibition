@@ -7,9 +7,9 @@ import json
 
 # def __init__(self):
 org = "univaq"
-token = "4qYRM7usBFEuc3Gxd01lC6Gpiohdwv4DWZ39xjhERohSKddjcpVdlDCzP6aCu8oT"
-url = "http://173.20.0.102:8086/"
-# url = "http://localhost:8086/"
+token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
+# url = "http://173.20.0.102:8086/"
+url = "http://localhost:8086/"
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
 
 
@@ -45,7 +45,7 @@ def get_artworks_name():
 
 
 def get_artwork_mean_light(artwork):
-    query = f'from(bucket: "artexhibition") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) ' \
+    query = f'from(bucket: "artexhibition") |> range(start: -30d) ' \
             f'|> filter(fn: (r) => r["_measurement"] == "artworks")' \
             f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
             f'|> filter(fn: (r) => r["_field"] == "light") ' \
@@ -57,7 +57,7 @@ def get_artwork_mean_light(artwork):
 
 
 def get_artwork_current_light(artwork):
-    query = f'from(bucket: "artexhibition") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) ' \
+    query = f'from(bucket: "artexhibition") |> range(start: -30d) ' \
             f'|> filter(fn: (r) => r["_measurement"] == "artworks")' \
             f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
             f'|> filter(fn: (r) => r["_field"] == "light") ' \
@@ -70,7 +70,7 @@ def get_artwork_current_light(artwork):
 
 def get_room_mean(room, field):  # field can be temperature, light, humidity or smoke
     query = f'from(bucket: "artexhibition") ' \
-            f'|> range(start: v.timeRangeStart, stop: v.timeRangeStop) ' \
+            f'|> range(start: -30d) ' \
             f'|> filter(fn: (r) => r["_measurement"] == "rooms") ' \
             f'|> filter(fn: (r) => r["room"] == "{room}") ' \
             f'|> filter(fn: (r) => r["_field"] == "{field}") ' \
@@ -83,6 +83,7 @@ def get_room_mean(room, field):  # field can be temperature, light, humidity or 
 
 def get_room_current(room, field):
     query = f'from(bucket: "artexhibition") ' \
+            f'|> range(start: -5m) ' \
             f'|> filter(fn: (r) => r["_measurement"] == "rooms") ' \
             f'|> filter(fn: (r) => r["room"] == "{room}") ' \
             f'|> filter(fn: (r) => r["_field"] == "{field}") ' \
@@ -108,7 +109,7 @@ def get_measurement_for_room(room, measurement):
 
 def get_people_from_db(room):
     org = "univaq"
-    token = "r5EwDxI9D8RNOIkz-84Ozrucn5azbt8u95aqfhvrBzwzHDtACumjD3Rep5TbT4tTQLHAIMoJ3okTUPG_gpSoXg=="
+    # token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
     # url = "http://173.20.0.102:8086/"
     url = "http://localhost:8086/"
     client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
@@ -125,7 +126,8 @@ def get_people_from_db(room):
 
 
 def get_target_parameter(measurement):  # METODO PER PRENDERSI DA CONFIG LE SOGLIE IMPOSTATE DALL'UTENTE
-    url = f'http://173.20.0.108:5008/config/targets/{measurement}'
+    # url = f'http://173.20.0.108:5008/config/targets/{measurement}'
+    url = f'http://localhost:5008/config/targets/{measurement}'
     response = requests.get(url)
     target = response.json()['data']
     return target
@@ -157,7 +159,7 @@ def get_artwork_light_range(artwork): #TODO: capire cosa fa, se ritorna la media
 def get_room_mode(room):
     query = f'from(bucket: "artexhibition") \
             |> range(start: 2024-01-01T15:00:00Z)\
-            |> filter(fn: (r) => r["_measurement"] == "indoor")\
+            |> filter(fn: (r) => r["_measurement"] == "rooms")\
             |> filter(fn: (r) => r["room"] == "{room}")\
             |> filter(fn: (r) => r["_field"] == "mode")\
             |> last(column: "_field") \
@@ -168,7 +170,8 @@ def get_room_mode(room):
 
 
 def get_all_modes_ranges():
-    url = 'http://173.20.0.108:5008/config/modes/all'
+    # url = 'http://173.20.0.108:5008/config/modes/all'
+    url = 'http://localhost:5008/config/modes/all'
     mode_file = requests.get(url)
     modes = mode_file.json()['modes']
     return modes
@@ -189,7 +192,7 @@ def storeTimeSlots(timeSlot: tuple, room: str):
     # influxdb connection
     bucket = "artexhibition"
     org = "univaq"
-    token = "r5EwDxI9D8RNOIkz-84Ozrucn5azbt8u95aqfhvrBzwzHDtACumjD3Rep5TbT4tTQLHAIMoJ3okTUPG_gpSoXg=="
+    token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
     url = "http://localhost:8086/"
     # url = "http://175.20.0.103:8086/"
     client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)

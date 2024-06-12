@@ -47,4 +47,4 @@ def get_targets_json():
     return resp
 
 if __name__ == "__main__":
-    app.run(debug=True,host='173.20.0.108', port=5008)
+    app.run(debug=True,host='localhost', port=5008)

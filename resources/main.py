@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 
 from Artwork import Artwork
 from Room import Room
+from ModeDefinition import ModeDefinition
 
 
 def main():
@@ -16,7 +17,6 @@ def main():
     artworks = []
 
     #TODO: DA CAPIRE COSA FARE CON SMOKE
-    #TODO: todo
 
     room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10)
     rooms.append(room1)
@@ -31,6 +31,9 @@ def main():
     artworks.append(gioconda)
     guernica = Artwork(name="Guernica", light=25, room="room2")
     artworks.append(guernica)
+
+    modes = ModeDefinition()
+    modes.storeModes(rooms)
 
     while True:
         for room in rooms:

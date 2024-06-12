@@ -84,7 +84,7 @@ def check_parameters_symptoms(data):
         for measurement in data[room]:
             if measurement != "people":
                 target = int(KnowledgeRetrieving.get_target_parameter(measurement=measurement))
-                actual_value = numpy.mean(list(data[room][measurement].values()))
+                actual_value = data[room][measurement]
 
                 # 2 means to increase the value and set mode to danger
                 # 1 means to increase the value
@@ -205,7 +205,7 @@ def check_busy_time_slot(room):
 
 
 def check_people(room: str):
-    mode = KnowledgeRetrieving.getModeRoom(room)
+    mode = KnowledgeRetrieving.get_room_mode(room)
     utcnow = datetime.utcnow()
     current_hour = utcnow.hour
 
