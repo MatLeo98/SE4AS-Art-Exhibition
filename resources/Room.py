@@ -32,9 +32,17 @@ class Room:
         #TODO: DA RANDOMIZZARE MEGLIO
         if rand == 0:
             self.temperature = self.temperature + randint(-1, 1)
+            if self.temperature < 0:
+                self.temperature = 0
             self.humidity = self.humidity + randint(-1, 1)
+            if self.humidity < 0:
+                self.humidity = 0
             self.air = self.air + randint(-1, 1)
+            if self.air < 0:
+                self.air = 0
             self.people = self.people + randint(-1, 1)
+            if self.people < 0:
+                self.people = 0
 
         client.publish(f"rooms/{self.name}/temperature/value", self.temperature)
         client.publish(f"rooms/{self.name}/humidity/value", self.humidity)

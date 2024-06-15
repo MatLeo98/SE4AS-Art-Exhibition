@@ -7,6 +7,7 @@
 "target": {
     "temperature": 20,
     "light": 180,
-    "humidity": 50
+    "humidity": 40,
+    "air": 50
     }
 }

@@ -23,7 +23,7 @@ def main():
             people = check_people(room)
 
             presence_data[room] = people
-        print("presence_Data:")
+        print("Room modes based on people inside:")
         print(presence_data)
 
         # url = 'http://localhost:5007/planner/presence'
@@ -40,7 +40,7 @@ def main():
 
             parameters_data[room] = room_values
 
-        print("parameters_data:")
+        print("Rooms measurements:")
         print(parameters_data)
 
         symptoms = check_parameters_symptoms(parameters_data)
@@ -82,21 +82,20 @@ def check_parameters_symptoms(data):
         interval = int(KnowledgeRetrieving.get_range(room=room))
         mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
-            if measurement != "people":
-                target = int(KnowledgeRetrieving.get_target_parameter(measurement=measurement))
-                actual_value = data[room][measurement]
+            target = int(KnowledgeRetrieving.get_target_parameter(measurement=measurement))
+            actual_value = data[room][measurement]
 
-                # 2 means to increase the value and set mode to danger
-                # 1 means to increase the value
-                # 0 don't do anything
-                # -1 means to decrease the value
-                # -2 means to decrease the value and set mode to danger
-                # 3 means to deactivate alarm and set mode to eco
+            # 2 means to increase the value and set mode to danger
+            # 1 means to increase the value
+            # 0 don't do anything
+            # -1 means to decrease the value
+            # -2 means to decrease the value and set mode to danger
+            # 3 means to deactivate alarm and set mode to eco
 
-                print(
-                    f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
+            print(
+                f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
 
-                process_measurement(mode, actual_value, target, interval, ranges, values, measurement)
+            process_measurement(mode, actual_value, target, interval, ranges, values, measurement)
 
         rooms[room] = values
     return rooms
@@ -129,26 +128,26 @@ def check_parameters_symptoms(data):
 
 def process_measurement(mode, actual_value, target, interval, ranges, values, measurement):
     def simply_decrease():
-        values[measurement] = 1
+        values[measurement] = -1
         print('Simply decrease')
 
     def simply_increase():
-        values[measurement] = -1
+        values[measurement] = 1
         print('Simply increase')
 
     def danger_decrease():
-        values[measurement] = 2
-        print('Danger, decrease and set mode to danger')
+        values[measurement] = -2
+        print('Danger, decrease and set mode to power')
 
     def danger_increase():
-        values[measurement] = -2
-        print('Danger, increase and set mode to danger')
+        values[measurement] = 2
+        print('Danger, increase and set mode to power')
 
     def no_more_danger():
         values[measurement] = 3
         print('No more danger, deactivate alarm and set mode to eco')
 
-    if mode in ['eco', 'normal']:
+    if mode in [0, 1]: #eco or normal mode
         if actual_value > target + interval:
             if actual_value < target + int(ranges['danger']):
                 simply_decrease()
@@ -160,13 +159,13 @@ def process_measurement(mode, actual_value, target, interval, ranges, values, me
                 simply_increase()
             else:
                 danger_increase()
-    elif mode == 'danger':
+    elif mode == 2: #power mode
         if actual_value > target + int(ranges['danger']):
-            print('Danger active, simply decrease')
-            values[measurement] = 1
+            print('Power active, simply decrease')
+            simply_decrease()
         elif actual_value < target - int(ranges['danger']):
-            print('Danger active, simply increase')
-            values[measurement] = -1
+            print('Power active, simply increase')
+            simply_increase()
         elif target - int(ranges['danger']) <= actual_value <= target + int(ranges['danger']):
             no_more_danger()
 
@@ -194,12 +193,13 @@ def check_busy_time_slot(room):
             if start_time <= record_time < end_time:
                 parsed.append(record[1])
         value = 0  # Non affollato
-        if parsed:  # Only calculate the mean if there are records in this time slot
+        if parsed:  # Calcola la media solo se ci sono record in questa fascia oraria
             mean = numpy.mean(parsed)
-            if mean >= 10 & mean < 20:
-                value = 1  # Normal situation
+            if 10 <= mean < 20:
+                value = 1  # Situazione normale
             elif mean >= 20:
-                value = 2  # Overpopulated
+                value = 2  # Molto affollato
+        # Overpopulated
         fasce_orarie[f'{start_time.time().strftime("%H:%M")} - {end_time.time().strftime("%H:%M")}'] = value
     return fasce_orarie
 
@@ -221,6 +221,8 @@ def check_people(room: str):
 
         value = KnowledgeRetrieving.get_room_people(room)
 
+        print(f'people in {room}: {value}')
+
         if value < 10:
             new_mode = 0  # eco
         elif 10 <= value <= 20:
@@ -237,6 +239,7 @@ def check_people(room: str):
                 print(f'{room}: set mode to power')
             return new_mode
         else:
+            print(f'{room}: correct mode already set')
             return mode
 
     # Se l'ora corrente non è tra le 8 e le 20, setta ad eco perché il museo è chiuso

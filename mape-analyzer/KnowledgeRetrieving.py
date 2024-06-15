@@ -7,7 +7,7 @@ import json
 
 # def __init__(self):
 org = "univaq"
-token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
+token = "CKrRn0kl4k-bXiL4mhNIQ9TAGrBuB6mjzbypZwLDkxA9qAzaWNgVMfgkVplr4Ys7W-Y9xXpPVSEiBtLeIFuP7Q=="
 # url = "http://173.20.0.102:8086/"
 url = "http://localhost:8086/"
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
@@ -109,13 +109,13 @@ def get_measurement_for_room(room, measurement):
 
 def get_people_from_db(room):
     org = "univaq"
-    # token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
+    # token = "r5EwDxI9D8RNOIkz-84Ozrucn5azbt8u95aqfhvrBzwzHDtACumjD3Rep5TbT4tTQLHAIMoJ3okTUPG_gpSoXg=="
     # url = "http://173.20.0.102:8086/"
     url = "http://localhost:8086/"
     client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
     query_api = client.query_api()
     query = f'from(bucket: "artexhibition")  |> range(start: -7d)  ' \
-            f'|> filter(fn: (r) => r["_measurement"] == "indoor")  ' \
+            f'|> filter(fn: (r) => r["_measurement"] == "rooms")  ' \
             f'|> filter(fn: (r) => r["room"] == "{room}")  ' \
             f'|> filter(fn: (r) => r["_field"] == "people")  |> yield(name: "mean")'
     result = query_api.query(org=org, query=query)
@@ -192,7 +192,7 @@ def storeTimeSlots(timeSlot: tuple, room: str):
     # influxdb connection
     bucket = "artexhibition"
     org = "univaq"
-    token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
+    # token = "r5EwDxI9D8RNOIkz-84Ozrucn5azbt8u95aqfhvrBzwzHDtACumjD3Rep5TbT4tTQLHAIMoJ3okTUPG_gpSoXg=="
     url = "http://localhost:8086/"
     # url = "http://175.20.0.103:8086/"
     client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
