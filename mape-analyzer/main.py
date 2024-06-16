@@ -50,20 +50,25 @@ def main():
         # url = 'http://173.20.0.105:5007/planner/symptoms'
         # x = requests.post(url, json=symptoms)
 
-        # artworks = KnowledgeRetrieving.get_artworks_name()
-        # artworks_measurement = "light"
-        # light_data = {}
-        #
-        # for artwork in artworks:
-        #     artwork_values = {}
-        #
-        #     # returns {time : value} of the measurement
-        #     value = KnowledgeRetrieving.get_artwork_current_light(artwork)
-        #     artwork_values["light"] = value
-        #
-        #     light_data[artwork] = artwork_values
-        #
-        # artwork_symptoms = check_parameters_symptoms(light_data)
+        artworks = KnowledgeRetrieving.get_artworks_name()
+        # artworks = KnowledgeRetrieving.get_artworks()
+        light_data = {}
+
+        for artwork in artworks:
+            # artwork_values = {}
+
+            # returns {time : value} of the measurement
+            light_value = KnowledgeRetrieving.get_artwork_current_light(artwork)
+            # artwork_values["light"] = value
+
+            light_data[artwork] = light_value
+
+        print("Artworks light:")
+        print(light_data)
+
+        artwork_symptoms = check_artwork_symptoms(light_data)
+        print("artworks symptoms:")
+        print(artwork_symptoms)
         # # url = 'http://localhost:5007/planner/symptoms'
         # url = 'http://173.20.0.105:5007/planner/symptoms'
         # x = requests.post(url, json=symptoms)
@@ -99,32 +104,6 @@ def check_parameters_symptoms(data):
 
         rooms[room] = values
     return rooms
-
-# def check_artwork_symptoms(data):
-#     artworks = {}
-#     ranges = KnowledgeRetrieving.get_all_modes_ranges()
-#     for room in data:
-#         values = {}
-#         interval = int(KnowledgeRetrieving.get_artwork_light_range(artwork=artwork))
-#         mode = KnowledgeRetrieving.get_room_mode(room)
-#         for light in data[room]:
-#                 target = int(KnowledgeRetrieving.get_target_parameter(measurement"light"))
-#                 actual_value = numpy.mean(list(data[room]["light"].values()))
-#
-#                 # 2 means to increase the value and set mode to danger
-#                 # 1 means to increase the value
-#                 # 0 don't do anything
-#                 # -1 means to decrease the value
-#                 # -2 means to decrease the value and set mode to danger
-#                 # 3 means to deactivate alarm and set mode to eco
-#
-#                 print(
-#                     f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
-#
-#                 process_measurement(mode, actual_value, target, interval, ranges, values, measurement)
-#
-#         rooms[room] = values
-#     return rooms
 
 def process_measurement(mode, actual_value, target, interval, ranges, values, measurement):
     def simply_decrease():
@@ -244,6 +223,34 @@ def check_people(room: str):
 
     # Se l'ora corrente non è tra le 8 e le 20, setta ad eco perché il museo è chiuso
     return 0
+
+
+def check_artwork_symptoms(data):
+    artworks = {}
+    ranges = KnowledgeRetrieving.get_all_modes_ranges()
+    for artwork in data:
+        values = {}
+        room = KnowledgeRetrieving.get_artwork_room(artwork)
+        interval = int(KnowledgeRetrieving.get_range("room" + str(room))) #TODO: da modificare con light range
+        mode = KnowledgeRetrieving.get_room_mode("room" + str(room))
+        # for artwork in data:
+        target = int(KnowledgeRetrieving.get_target_parameter("light"))
+        actual_value = data[artwork]
+
+        # 2 means to increase the value and set mode to danger
+        # 1 means to increase the value
+        # 0 don't do anything
+        # -1 means to decrease the value
+        # -2 means to decrease the value and set mode to danger
+        # 3 means to deactivate alarm and set mode to eco
+
+        print(
+            f'\nArtwork: {artwork} Room: room{room}, Mode: {mode}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}')
+
+        process_measurement(mode, actual_value, target, interval, ranges, values, "light")
+
+        artworks[artwork] = values
+    return artworks
 
 
 if __name__ == "__main__":

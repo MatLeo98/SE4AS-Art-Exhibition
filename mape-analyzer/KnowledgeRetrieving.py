@@ -44,6 +44,8 @@ def get_artworks_name():
     return artworks
 
 
+
+
 def get_artwork_mean_light(artwork):
     query = f'from(bucket: "artexhibition") |> range(start: -30d) ' \
             f'|> filter(fn: (r) => r["_measurement"] == "artworks")' \
@@ -51,6 +53,18 @@ def get_artwork_mean_light(artwork):
             f'|> filter(fn: (r) => r["_field"] == "light") ' \
             f'|> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false) ' \
             f'|> yield(name: "mean")'
+    result = client.query_api().query(org=org, query=query)
+    result = json.loads(result.to_json())[0]['_value']
+    return result
+
+def get_artwork_room(artwork):
+    query = f'from(bucket: "artexhibition")'\
+              f'|> range(start: -30d)'\
+              f'|> filter(fn: (r) => r["_measurement"] == "artworks") '\
+              f'|> filter(fn: (r) => r["_field"] == "room") ' \
+              f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
+            f'|> last() ' \
+            f'|> yield(name: "last_value")'
     result = client.query_api().query(org=org, query=query)
     result = json.loads(result.to_json())[0]['_value']
     return result

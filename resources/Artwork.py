@@ -20,5 +20,6 @@ class Artwork:
             self.light = self.light + randint(-1, 1)
 
         client.publish(f"artworks/{self.name}/light/value", self.light)
+        client.publish(f"artworks/{self.name}/room/value", self.room)
 
         print(f'Publishing data for {self.name}')
