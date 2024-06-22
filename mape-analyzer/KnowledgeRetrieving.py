@@ -2,15 +2,12 @@ import influxdb_client
 import requests
 from influxdb_client.client.write_api import SYNCHRONOUS
 import json
+from ..constants import *
 
-# class KnowledgeRetrieving:
 
-# def __init__(self):
-org = "univaq"
-token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
 # url = "http://173.20.0.102:8086/"
-url = "http://localhost:8086/"
-client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+
+client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
 
 
 def query_executor(query):
@@ -121,11 +118,8 @@ def get_measurement_for_room(room, measurement):
 
 
 def get_people_from_db(room):
-    org = "univaq"
-    # token = "r5EwDxI9D8RNOIkz-84Ozrucn5azbt8u95aqfhvrBzwzHDtACumjD3Rep5TbT4tTQLHAIMoJ3okTUPG_gpSoXg=="
     # url = "http://173.20.0.102:8086/"
-    url = "http://localhost:8086/"
-    client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+    client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
     query_api = client.query_api()
     query = f'from(bucket: "artexhibition")  |> range(start: -7d)  ' \
             f'|> filter(fn: (r) => r["_measurement"] == "rooms")  ' \
@@ -188,13 +182,8 @@ def getRoomTemperatureData(room):
 
 
 def storeTimeSlots(timeSlot: tuple, room: str):
-    # influxdb connection
-    bucket = "artexhibition"
-    org = "univaq"
-    # token = "r5EwDxI9D8RNOIkz-84Ozrucn5azbt8u95aqfhvrBzwzHDtACumjD3Rep5TbT4tTQLHAIMoJ3okTUPG_gpSoXg=="
-    url = "http://localhost:8086/"
     # url = "http://175.20.0.103:8086/"
-    client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+    client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
     write_api = client.write_api(write_options=SYNCHRONOUS)
 
     measurement = "timeSlot"
@@ -217,9 +206,6 @@ def get_room_people(room):
     result = client.query_api().query(org=org, query=query)
     parsed = json.loads(result.to_json())
     return parsed[0]['_value']
-
-
-# Da qui in giù forse va tolto, nel nostro caso non serve
 
 
 # def get_room_time_slots(room: str, timeslot: str):
@@ -245,9 +231,3 @@ def get_room_people(room):
 #     result = client.query_api().query(org=org, query=query)
 #     parsed = json.loads(result.to_json())
 #     return parsed[0]['_value']
-
-if __name__ == '__main__':
-    # get_artworks_db('Guernica')
-    # get_artworks_name()
-    # get_rooms_name()
-    getRoomTemperatureData('room1')
