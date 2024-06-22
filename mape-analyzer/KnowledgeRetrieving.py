@@ -7,7 +7,7 @@ import json
 
 # def __init__(self):
 org = "univaq"
-token = "CKrRn0kl4k-bXiL4mhNIQ9TAGrBuB6mjzbypZwLDkxA9qAzaWNgVMfgkVplr4Ys7W-Y9xXpPVSEiBtLeIFuP7Q=="
+token = "9mUSjSX8n696aQLPFVrHTD4GBaW5wDAhde9tXtlnuy29KQrQidqWA4w1q7shPBwS3myiRNoTGUkm0FPZBQlNnQ=="
 # url = "http://173.20.0.102:8086/"
 url = "http://localhost:8086/"
 client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
@@ -44,8 +44,6 @@ def get_artworks_name():
     return artworks
 
 
-
-
 def get_artwork_mean_light(artwork):
     query = f'from(bucket: "artexhibition") |> range(start: -30d) ' \
             f'|> filter(fn: (r) => r["_measurement"] == "artworks")' \
@@ -57,12 +55,13 @@ def get_artwork_mean_light(artwork):
     result = json.loads(result.to_json())[0]['_value']
     return result
 
+
 def get_artwork_room(artwork):
-    query = f'from(bucket: "artexhibition")'\
-              f'|> range(start: -30d)'\
-              f'|> filter(fn: (r) => r["_measurement"] == "artworks") '\
-              f'|> filter(fn: (r) => r["_field"] == "room") ' \
-              f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
+    query = f'from(bucket: "artexhibition")' \
+            f'|> range(start: -30d)' \
+            f'|> filter(fn: (r) => r["_measurement"] == "artworks") ' \
+            f'|> filter(fn: (r) => r["_field"] == "room") ' \
+            f'|> filter(fn: (r) => r["artwork"] == "{artwork}") ' \
             f'|> last() ' \
             f'|> yield(name: "last_value")'
     result = client.query_api().query(org=org, query=query)
@@ -142,9 +141,7 @@ def get_people_from_db(room):
 def get_target_parameter(measurement):  # METODO PER PRENDERSI DA CONFIG LE SOGLIE IMPOSTATE DALL'UTENTE
     # url = f'http://173.20.0.108:5008/config/targets/{measurement}'
     url = f'http://localhost:5008/config/targets/{measurement}'
-    response = requests.get(url)
-    target = response.json()['data']
-    return target
+    return requests.get(url).json()
 
 
 def get_range(room):
@@ -152,17 +149,6 @@ def get_range(room):
     query_api = client.query_api()
     query = f'from(bucket: "artexhibition")  |> range(start: 2023-01-01T15:00:00Z)  ' \
             f'|> filter(fn: (r) => r["_measurement"] == "rooms")  |> filter(fn: (r) => r["room"] == "{room}")  ' \
-            f'|> filter(fn: (r) => r["_field"] == "range")  |> last(column: "_field")  ' \
-            f'|> yield(name: "mean")'
-    result = query_api.query(org=org, query=query)
-    result = json.loads(result.to_json())[0]['_value']
-    return result
-
-def get_artwork_light_range(artwork): #TODO: capire cosa fa, se ritorna la media dei valori o se serve quel range
-    client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
-    query_api = client.query_api()
-    query = f'from(bucket: "artexhibition")  |> range(start: 2023-01-01T15:00:00Z)  ' \
-            f'|> filter(fn: (r) => r["_measurement"] == "artworks")  |> filter(fn: (r) => r["artwork"] == "{artwork}")  ' \
             f'|> filter(fn: (r) => r["_field"] == "range")  |> last(column: "_field")  ' \
             f'|> yield(name: "mean")'
     result = query_api.query(org=org, query=query)
@@ -185,10 +171,8 @@ def get_room_mode(room):
 
 def get_all_modes_ranges():
     # url = 'http://173.20.0.108:5008/config/modes/all'
-    url = 'http://localhost:5008/config/modes/all'
-    mode_file = requests.get(url)
-    modes = mode_file.json()['modes']
-    return modes
+    url = 'http://localhost:5008/config/modes'
+    return requests.get(url).json()
 
 
 def getRoomTemperatureData(room):
@@ -201,6 +185,7 @@ def getRoomTemperatureData(room):
     result = json.loads(result.to_json())[0]['_value']
     print("result: ", result)
     return result
+
 
 def storeTimeSlots(timeSlot: tuple, room: str):
     # influxdb connection
@@ -220,8 +205,8 @@ def storeTimeSlots(timeSlot: tuple, room: str):
     p = influxdb_client.Point(measurement).tag('room', tag).field(field, int(value))
     write_api.write(bucket=bucket, org=org, record=p)
 
+
 def get_room_people(room):
-    #TODO: DA CONTROLLARE QUERY
     query = f'from(bucket: "artexhibition") \
                 |> range(start: -5m) \
                 |> filter(fn: (r) => r["_measurement"] == "rooms") \
@@ -235,7 +220,6 @@ def get_room_people(room):
 
 
 # Da qui in giù forse va tolto, nel nostro caso non serve
-
 
 
 # def get_room_time_slots(room: str, timeslot: str):

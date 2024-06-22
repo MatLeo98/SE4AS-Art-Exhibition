@@ -15,13 +15,15 @@ class Room:
     humidity = 0
     air = 0
     people = 0
+    smoke = 0
 
-    def __init__(self, name: str, temperature: int, humidity: int, air: int, people: int):
+    def __init__(self, name: str, temperature: int, humidity: int, air: int, people: int, smoke: int):
         self.name = name
         self.temperature = temperature
         self.humidity = humidity
         self.air = air
         self.people = people
+        self.smoke = smoke
         self.sensors = [Conditioner.Conditioner(self),
                         Dehumidifier.Dehumidifier(self),
                         SmokeDetector.SmokeDetector(self)]
@@ -29,7 +31,8 @@ class Room:
 
     def simulate(self, client: Client):
         rand = random.randint(0, 9)
-        #TODO: DA RANDOMIZZARE MEGLIO
+        smoke_rand = random.randint(0,100)
+
         if rand == 0:
             self.temperature = self.temperature + randint(-1, 1)
             if self.temperature < 0:
@@ -43,10 +46,15 @@ class Room:
             self.people = self.people + randint(-1, 1)
             if self.people < 0:
                 self.people = 0
+        if smoke_rand == 0:
+            self.smoke = 1
+        else:
+            self.smoke = 0
 
         client.publish(f"rooms/{self.name}/temperature/value", self.temperature)
         client.publish(f"rooms/{self.name}/humidity/value", self.humidity)
         client.publish(f"rooms/{self.name}/air/value", self.air)
         client.publish(f"rooms/{self.name}/people/value", self.people)
+        client.publish(f"rooms/{self.name}/smoke/value", self.smoke)
 
         print(f'Publishing data for {self.name}')

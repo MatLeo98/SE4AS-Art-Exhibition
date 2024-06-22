@@ -26,9 +26,9 @@ def main():
         print("Room modes based on people inside:")
         print(presence_data)
 
-        # url = 'http://localhost:5007/planner/presence'
-        # url = 'http://173.20.0.105:5007/planner/presence'
-        # x = requests.post(url, json=presence_data)
+        url = 'http://localhost:5007/planner/people'
+        # url = 'http://173.20.0.105:5007/planner/people'
+        requests.post(url, json=presence_data)
 
         # dictionary of data are organized in this way {room : {measurement : {time : value}}}
         for room in rooms:
