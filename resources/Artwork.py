@@ -8,7 +8,7 @@ class Artwork:
     name = ""
     light = 0
 
-    def __init__(self, name: str, light: int, room: str):
+    def __init__(self, name: str, light: int, room: int):
         self.name = name
         self.light = light
         self.room = room

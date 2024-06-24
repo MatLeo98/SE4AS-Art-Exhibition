@@ -4,15 +4,13 @@ import paho.mqtt.client as mqtt
 from Artwork import Artwork
 from Room import Room
 from ModeDefinition import ModeDefinition
+from ArtExhibition.constants import mqtt_url
 
 
 def main():
-    # MQTT client creation
     client = mqtt.Client("resources", reconnect_on_failure=True)
-    client.connect("localhost", 1884) #works on IDE
-    # client.connect("173.20.0.100", port=1884) #works with docker
+    client.connect(mqtt_url, 1884)
 
-    # room creation
     rooms = []
     artworks = []
 
@@ -25,9 +23,9 @@ def main():
     room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10, smoke=0, window=False)
     rooms.append(room4)
 
-    gioconda = Artwork(name="Gioconda", light=30, room="room1")
+    gioconda = Artwork(name="Gioconda", light=30, room=1)
     artworks.append(gioconda)
-    guernica = Artwork(name="Guernica", light=25, room="room2")
+    guernica = Artwork(name="Guernica", light=25, room=2)
     artworks.append(guernica)
 
     modes = ModeDefinition()

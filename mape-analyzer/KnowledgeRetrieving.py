@@ -2,10 +2,8 @@ import influxdb_client
 import requests
 from influxdb_client.client.write_api import SYNCHRONOUS
 import json
-from ..constants import *
+from ArtExhibition.constants import *
 
-
-# url = "http://173.20.0.102:8086/"
 
 client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
 
@@ -74,6 +72,7 @@ def get_artwork_current_light(artwork):
             f'|> last() ' \
             f'|> yield(name: "last_value")'
     result = client.query_api().query(org=org, query=query)
+
     result = json.loads(result.to_json())[0]['_value']
     return result
 
@@ -118,7 +117,6 @@ def get_measurement_for_room(room, measurement):
 
 
 def get_people_from_db(room):
-    # url = "http://173.20.0.102:8086/"
     client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
     query_api = client.query_api()
     query = f'from(bucket: "artexhibition")  |> range(start: -7d)  ' \
@@ -132,14 +130,12 @@ def get_people_from_db(room):
     return values
 
 
-def get_target_parameter(measurement):  # METODO PER PRENDERSI DA CONFIG LE SOGLIE IMPOSTATE DALL'UTENTE
-    # url = f'http://173.20.0.108:5008/config/targets/{measurement}'
-    url = f'http://localhost:5008/config/targets/{measurement}'
-    return requests.get(url).json()
+def get_target_thresholds(measurement):
+    return requests.get(f'{config_url}/config/targets/{measurement}').json()
 
 
 def get_range(room):
-    client = influxdb_client.InfluxDBClient(url=url, token=token, org=org)
+    client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
     query_api = client.query_api()
     query = f'from(bucket: "artexhibition")  |> range(start: 2023-01-01T15:00:00Z)  ' \
             f'|> filter(fn: (r) => r["_measurement"] == "rooms")  |> filter(fn: (r) => r["room"] == "{room}")  ' \
@@ -164,9 +160,7 @@ def get_room_mode(room):
 
 
 def get_all_modes_ranges():
-    # url = 'http://173.20.0.108:5008/config/modes/all'
-    url = 'http://localhost:5008/config/modes'
-    return requests.get(url).json()
+    return requests.get(f'{config_url}/config/modes').json()
 
 
 def getRoomTemperatureData(room):
@@ -182,7 +176,6 @@ def getRoomTemperatureData(room):
 
 
 def storeTimeSlots(timeSlot: tuple, room: str):
-    # url = "http://175.20.0.103:8086/"
     client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
     write_api = client.write_api(write_options=SYNCHRONOUS)
 

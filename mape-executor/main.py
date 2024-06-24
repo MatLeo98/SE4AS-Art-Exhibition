@@ -3,12 +3,12 @@ import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
 import uvicorn
-from ..constants import *
+from ArtExhibition.constants import *
 
 app = FastAPI()
 mqtt_client = mqtt.Client("executor")
-mqtt_client.connect("localhost", 1884)
-# mqtt_client.connect("173.20.0.100", port=1884)
+mqtt_client.connect(mqtt_url, 1884)
+
 
 @app.post("/mode/{room}/{value}")
 async def mode_change(room: str, value: int):

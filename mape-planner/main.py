@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from typing import Dict
 import uvicorn
+from ArtExhibition.constants import executor_url
 
 app = FastAPI()
 
@@ -24,13 +25,12 @@ codes = {
 @app.post("/planner/symptoms")
 async def check_symptoms(request: SymptomsRequest):
     symptoms = request.symptoms
-    url = 'http://localhost:5006'
 
     try:
         for room, measurements in symptoms.items():
             for measurement, condition in measurements.items():
                 print(f'\nRoom: {room}, Measurement: {measurement}, Condition: {condition}')
-                new_url = f'{url}/{room}/{measurement}'
+                new_url = f'{executor_url}/{room}/{measurement}'
 
                 if condition == codes['over']:
                     action_url = f'{new_url}/down'
@@ -49,13 +49,13 @@ async def check_symptoms(request: SymptomsRequest):
                     action_message = f'{measurement} symptom: {condition}. {measurement} has a critical value, emergency increase.'
 
                 elif condition in codes['activate_alarm']:
-                    action_url = f'{url}/{room}/smoke-alarm/on'
+                    action_url = f'{executor_url}/{room}/smoke-alarm/on'
                     action_message = (f'{measurement} symptom: {condition}. '
                                       f'{measurement} should {"decrease" if condition == codes["over_danger"] else "increase"}. '
                                       'Alarm should be activated.')
 
                 elif condition == codes['deactivate_alarm']:
-                    action_url = f'{url}/{room}/smoke-alarm/off'
+                    action_url = f'{executor_url}/{room}/smoke-alarm/off'
                     action_message = f'{measurement} symptom: {condition}. Alarm should be deactivated.'
 
                 else:
@@ -79,12 +79,10 @@ async def check_symptoms(request: SymptomsRequest):
 async def change_mode(request: Request):
     modes = await request.json()
     print("New modes: ", modes)
-    # url = 'http://173.20.0.106:5006/mode'
-    url = 'http://localhost:5006/mode'
 
     try:
         for room in modes:
-            requests.post(f'{url}/{room}/{modes[room]}')
+            requests.post(f'{executor_url}/mode/{room}/{modes[room]}')
 
     except Exception as exc:
         print(exc)

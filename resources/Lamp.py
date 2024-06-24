@@ -1,10 +1,9 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-# from tenacity import retry
+from ArtExhibition.constants import mqtt_url
 
 class Lamp:
 
-    # @retry()
     def __init__(self, artwork):
         self.artwork = artwork
         self.client = mqtt.Client(client_id=f"Lamp_{artwork.name}")
@@ -12,8 +11,7 @@ class Lamp:
         thread.start()
 
     def initialize_mqtt(self):
-        #self.client.connect("localhost", 1884)
-        self.client.connect("175.20.0.100", 1884)
+        self.client.connect(mqtt_url, 1884)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.loop_forever()

@@ -1,10 +1,9 @@
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
-from ..constants import *
+from ArtExhibition.constants import *
 
 
 def write(topic: str, value: int):
-    # url = "http://175.20.0.103:8086/"
     client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
     write_api = client.write_api(write_options=SYNCHRONOUS)
 

@@ -1,12 +1,13 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
+from ArtExhibition.constants import mqtt_url
 
 
 class Purifier:
     def __init__(self, room):
         self.room = room
         self.client = mqtt.Client(client_id=f"Purifier_{room.name}")
-        self.client.connect("localhost", 1884)
+        self.client.connect(mqtt_url, 1884)
         self.thread = Thread(target=self.initialize_mqtt)
         self.thread.start()
 

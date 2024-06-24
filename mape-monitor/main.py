@@ -1,5 +1,6 @@
 from KnowledgeStore import write
 import paho.mqtt.client as mqtt
+from ArtExhibition.constants import mqtt_url
 
 
 def broker_subscription(client, userdata, flags, rc):
@@ -15,7 +16,7 @@ def message_received(client, userdata, msg):
 
 if __name__ == '__main__':
     client = mqtt.Client(client_id="mape-monitor", reconnect_on_failure=True)
-    client.connect("localhost", 1884)
+    client.connect(mqtt_url, 1884)
     client.on_connect = broker_subscription
     client.on_message = message_received
     client.loop_forever()

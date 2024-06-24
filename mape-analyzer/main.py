@@ -5,6 +5,7 @@ import numpy
 from tenacity import retry
 import KnowledgeRetrieving
 import requests
+from ArtExhibition.constants import planner_url
 
 
 def main():
@@ -26,9 +27,7 @@ def main():
         print("Room modes based on people inside:")
         print(presence_data)
 
-        url = 'http://localhost:5007/planner/people'
-        # url = 'http://173.20.0.105:5007/planner/people'
-        requests.post(url, json=presence_data)
+        requests.post(f'{planner_url}/planner/people', json=presence_data)
 
         # dictionary of data are organized in this way {room : {measurement : {time : value}}}
         for room in rooms:
@@ -87,7 +86,7 @@ def check_parameters_symptoms(data):
         interval = int(KnowledgeRetrieving.get_range(room=room))
         mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
-            target = int(KnowledgeRetrieving.get_target_parameter(measurement=measurement))
+            target = int(KnowledgeRetrieving.get_target_thresholds(measurement=measurement))
             actual_value = data[room][measurement]
 
             # 2 means to increase the value and set mode to danger
@@ -234,7 +233,7 @@ def check_artwork_symptoms(data):
         interval = int(KnowledgeRetrieving.get_range("room" + str(room))) #TODO: da modificare con light range
         mode = KnowledgeRetrieving.get_room_mode("room" + str(room))
         # for artwork in data:
-        target = int(KnowledgeRetrieving.get_target_parameter("light"))
+        target = int(KnowledgeRetrieving.get_target_thresholds("light"))
         actual_value = data[artwork]
 
         # 2 means to increase the value and set mode to danger
