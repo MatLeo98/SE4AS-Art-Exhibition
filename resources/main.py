@@ -16,18 +16,18 @@ def main():
     rooms = []
     artworks = []
 
-    room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10, smoke=0)
+    room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10, smoke=0, window=False)
     rooms.append(room1)
-    room2 = Room(name="room2", temperature=20, humidity=52, air=21, people=10, smoke=0)
+    room2 = Room(name="room2", temperature=20, humidity=52, air=21, people=10, smoke=0, window=False)
     rooms.append(room2)
-    room3 = Room(name="room3", temperature=22, humidity=35, air=15, people=10, smoke=0)
+    room3 = Room(name="room3", temperature=22, humidity=35, air=15, people=10, smoke=0, window=False)
     rooms.append(room3)
-    room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10, smoke=0)
+    room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10, smoke=0, window=False)
     rooms.append(room4)
 
-    gioconda = Artwork(name="Gioconda", light=30, room=1)
+    gioconda = Artwork(name="Gioconda", light=30, room="room1")
     artworks.append(gioconda)
-    guernica = Artwork(name="Guernica", light=25, room=2)
+    guernica = Artwork(name="Guernica", light=25, room="room2")
     artworks.append(guernica)
 
     modes = ModeDefinition()

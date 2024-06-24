@@ -5,8 +5,9 @@ from paho.mqtt.client import Client
 
 import Conditioner
 import Dehumidifier
-import SmokeAlarm
 import SmokeDetector
+import Shutter
+import Purifier
 
 
 class Room:
@@ -16,18 +17,21 @@ class Room:
     air = 0
     people = 0
     smoke = 0
+    window = False
 
-    def __init__(self, name: str, temperature: int, humidity: int, air: int, people: int, smoke: int):
+    def __init__(self, name: str, temperature: int, humidity: int, air: int, people: int, smoke: int, window: bool):
         self.name = name
         self.temperature = temperature
         self.humidity = humidity
         self.air = air
         self.people = people
         self.smoke = smoke
-        self.sensors = [Conditioner.Conditioner(self),
+        self.window = window
+        self.devices = [Conditioner.Conditioner(self),
                         Dehumidifier.Dehumidifier(self),
-                        SmokeDetector.SmokeDetector(self)]
-        self.smokeAlarm = SmokeAlarm.SmokeAlarm()
+                        SmokeDetector.SmokeDetector(self),
+                        Shutter.Shutter(self),
+                        Purifier.Purifier(self)]
 
     def simulate(self, client: Client):
         rand = random.randint(0, 9)

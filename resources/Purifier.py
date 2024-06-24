@@ -2,14 +2,11 @@ from threading import Thread
 import paho.mqtt.client as mqtt
 
 
-class SmokeDetector:
-
+class Purifier:
     def __init__(self, room):
         self.room = room
-        self.client = mqtt.Client(client_id=f"SmokeDetector_{room.name}")
+        self.client = mqtt.Client(client_id=f"Purifier_{room.name}")
         self.client.connect("localhost", 1884)
-        #self.client.connect("173.20.0.100", 1884)
-        self.alarm = False
         self.thread = Thread(target=self.initialize_mqtt)
         self.thread.start()
 
@@ -19,7 +16,7 @@ class SmokeDetector:
         self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe("smokeDetector/#")
+        self.client.subscribe("purifier/#")
 
     def on_message(self, client, userdata, msg):
         payload = msg.payload.decode("utf-8")
@@ -28,7 +25,14 @@ class SmokeDetector:
         room_name = topic_split[1]
         condition = topic_split[2]
 
-        if condition == "danger":
-            self.alarm = True
-        else:
-            self.alarm = False
+        if room_name == self.room.name:
+            if condition == 'up':
+                self.increase_air()
+            else:
+                self.decrease_air()
+
+    def increase_air(self):
+        self.room.air = self.room.air + 1
+
+    def decrease_air(self):
+        self.room.air = self.room.air - 1
