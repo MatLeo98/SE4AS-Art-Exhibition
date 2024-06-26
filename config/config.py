@@ -22,6 +22,11 @@ def get_target(measurement: str):
     with open('config.prop', 'r') as c:
         return json.loads(c.read())['target'].get(measurement)
 
+@app.get("/config/ranges/{measurement}")
+def get_range(measurement: str):
+    with open('config.prop', 'r') as c:
+        return json.loads(c.read())['range'].get(measurement)
+
 
 @app.get("/config/targets")
 def get_targets():

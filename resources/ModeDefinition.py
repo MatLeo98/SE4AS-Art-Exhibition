@@ -27,6 +27,7 @@ class ModeDefinition:
             p = influxdb_client.Point(measurement).tag("room", tag).field(field, value)
             write_api.write(bucket=bucket, org=org, record=p)
 
-            field = "range"
-            p = influxdb_client.Point(measurement).tag("room", tag).field(field, value)
-            write_api.write(bucket=bucket, org=org, record=p)
+            #TODO: Creare un range per ogni measurement
+            # field = "range"
+            # p = influxdb_client.Point(measurement).tag("room", tag).field(field, value)
+            # write_api.write(bucket=bucket, org=org, record=p)

@@ -133,6 +133,9 @@ def get_people_from_db(room):
 def get_target_thresholds(measurement):
     return requests.get(f'{config_url}/config/targets/{measurement}').json()
 
+def get_tollerable_range(measurement):
+    return requests.get(f'{config_url}/config/ranges/{measurement}').json()
+
 
 def get_range(room):
     client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)

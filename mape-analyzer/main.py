@@ -83,9 +83,10 @@ def check_parameters_symptoms(data):
     ranges = KnowledgeRetrieving.get_all_modes_ranges()
     for room in data:
         values = {}
-        interval = int(KnowledgeRetrieving.get_range(room=room))
+        # interval = int(KnowledgeRetrieving.get_range(room=room))
         mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
+            interval = int(KnowledgeRetrieving.get_tollerable_range(measurement=measurement))
             target = int(KnowledgeRetrieving.get_target_thresholds(measurement=measurement))
             actual_value = data[room][measurement]
 

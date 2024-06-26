@@ -9,5 +9,11 @@
     "light": 180,
     "humidity": 40,
     "air": 50
+    },
+"range": {
+    "temperature": 2,
+    "light": 10,
+    "humidity": 10,
+    "air": 20
     }
 }
