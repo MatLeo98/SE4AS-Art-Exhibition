@@ -5,22 +5,17 @@ import uvicorn
 app = FastAPI()
 
 
-@app.get("/config/modes/{mode}")
-def get_mode(mode: str):
+@app.get("/config/danger/{measurement}")
+def get_mode(measurement: str):
     with open('config.prop', 'r') as c:
-        return json.loads(c.read())['mode'].get(mode)
-
-
-@app.get("/config/modes")
-def get_modes():
-    with open('config.prop', 'r') as c:
-        return json.loads(c.read())['mode']
+        return json.loads(c.read())['danger'].get(measurement)
 
 
 @app.get("/config/targets/{measurement}")
 def get_target(measurement: str):
     with open('config.prop', 'r') as c:
         return json.loads(c.read())['target'].get(measurement)
+
 
 @app.get("/config/ranges/{measurement}")
 def get_range(measurement: str):
@@ -32,6 +27,12 @@ def get_range(measurement: str):
 def get_targets():
     with open('config.prop', 'r') as c:
         return json.loads(c.read())['target']
+
+
+@app.get("/config/illumination")
+def get_illumination():
+    with open('config.prop', 'r') as c:
+        return json.loads(c.read())['illumination']
 
 
 if __name__ == "__main__":

@@ -48,5 +48,15 @@ async def alarm_turn_off(room: str):
     return {"message": "Alarm turned off successfully"}
 
 
+@app.post("/illumination/{action}")
+async def illumination(action: str):
+    if action == 'on':
+        mqtt_client.publish(f'illumination/{action}')
+    elif action == 'off':
+        mqtt_client.publish(f'illumination/{action}')
+
+    return {"message": f"Rooms and artworks illumination turned {action} successfully"}
+
+
 # uvicorn.run(app, host='173.20.0.106', port=5006)
 uvicorn.run(app, host='localhost', port=5006)

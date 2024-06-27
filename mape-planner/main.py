@@ -91,5 +91,10 @@ async def change_mode(request: Request):
     return {"message": "New modes sent to the executor"}
 
 
+@app.post("/planner/illumination/{action}")
+async def illumination(action: str):
+    requests.post(f'{executor_url}/illumination/{action}')
+
+
 # uvicorn.run(app, host="173.20.0.105", port=5007)
 uvicorn.run(app, host="localhost", port=5007)

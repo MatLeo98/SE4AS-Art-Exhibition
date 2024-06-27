@@ -12,7 +12,7 @@ class Artwork:
         self.name = name
         self.light = light
         self.room = room
-        self.sensors = [Lamp.Lamp(self)]
+        self.devices = [Lamp.Lamp(self)]
 
     def simulate(self, client: Client):
         rand = random.randint(0, 9)

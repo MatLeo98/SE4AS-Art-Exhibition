@@ -23,9 +23,9 @@ def main():
     room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10, smoke=0, window=False)
     rooms.append(room4)
 
-    gioconda = Artwork(name="Gioconda", light=30, room=1)
+    gioconda = Artwork(name="Gioconda", light=150, room=1)
     artworks.append(gioconda)
-    guernica = Artwork(name="Guernica", light=25, room=2)
+    guernica = Artwork(name="Guernica", light=120, room=2)
     artworks.append(guernica)
 
     modes = ModeDefinition()

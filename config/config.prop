@@ -1,8 +1,9 @@
 {
-"mode": {
-    "normal": 1,
-    "eco": 5,
-    "danger": 15
+"danger": {
+        "temperature": 5,
+        "light": 20,
+        "humidity": 20,
+        "air": 40
     },
 "target": {
     "temperature": 20,
@@ -15,5 +16,9 @@
     "light": 10,
     "humidity": 10,
     "air": 20
-    }
+    },
+"illumination": {
+    "start_hour": 19,
+    "end_hour": 6
+}
 }

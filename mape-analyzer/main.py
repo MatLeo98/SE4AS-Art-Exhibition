@@ -2,7 +2,6 @@ import traceback
 from datetime import datetime, timedelta
 from time import sleep
 import numpy
-from tenacity import retry
 import KnowledgeRetrieving
 import requests
 from ArtExhibition.constants import planner_url
@@ -13,6 +12,8 @@ def main():
         rooms = KnowledgeRetrieving.get_rooms_name()
 
         rooms_measurements = ["humidity", "temperature", "air"]
+
+        illumination()
 
         parameters_data = {}
         presence_data = {}
@@ -80,7 +81,7 @@ def main():
 # calulate the mean of the last 5 minutes for each measured parameter (except the movement) and finds the symptoms
 def check_parameters_symptoms(data):
     rooms = {}
-    ranges = KnowledgeRetrieving.get_all_modes_ranges()
+    ranges = KnowledgeRetrieving.get_danger_threshold()
     for room in data:
         values = {}
         # interval = int(KnowledgeRetrieving.get_range(room=room))
@@ -105,6 +106,7 @@ def check_parameters_symptoms(data):
         rooms[room] = values
     return rooms
 
+
 def process_measurement(mode, actual_value, target, interval, ranges, values, measurement):
     def simply_decrease():
         values[measurement] = -1
@@ -122,34 +124,41 @@ def process_measurement(mode, actual_value, target, interval, ranges, values, me
         values[measurement] = 2
         print('Danger, increase and set mode to power')
 
-    def no_more_danger():
+    def smoke_alarm_off():
         values[measurement] = 3
-        print('No more danger, deactivate alarm and set mode to eco')
+        print('No more smoke, deactivate smoke alarm')
 
-    if mode in [0, 1]: #eco or normal mode
-        if actual_value > target + interval:
-            if actual_value < target + int(ranges['danger']):
+    def smoke_alarm_on():
+        values[measurement] = -3
+        print('Smoke detected, activate smoke alarm!')
+
+    if measurement == "smoke":
+        if actual_value == 1:
+            smoke_alarm_on()
+        else:
+            smoke_alarm_off()
+    else:
+        if mode in [0, 1]:  # eco or normal mode
+            if actual_value > target + interval:
+                if actual_value < target + int(ranges['danger']):
+                    simply_decrease()
+                else:
+                    danger_decrease()
+
+            elif actual_value < target - interval:
+                if actual_value > target - int(ranges['danger']):
+                    simply_increase()
+                else:
+                    danger_increase()
+        elif mode == 2:  # power mode
+            if actual_value > target + int(ranges['danger']):
+                print('Power active, simply decrease')
                 simply_decrease()
-            else:
-                danger_decrease()
-
-        elif actual_value < target - interval:
-            if actual_value > target - int(ranges['danger']):
+            elif actual_value < target - int(ranges['danger']):
+                print('Power active, simply increase')
                 simply_increase()
-            else:
-                danger_increase()
-    elif mode == 2: #power mode
-        if actual_value > target + int(ranges['danger']):
-            print('Power active, simply decrease')
-            simply_decrease()
-        elif actual_value < target - int(ranges['danger']):
-            print('Power active, simply increase')
-            simply_increase()
-        elif target - int(ranges['danger']) <= actual_value <= target + int(ranges['danger']):
-            no_more_danger()
 
 
-@retry()
 def check_busy_time_slot(room):
     datas = []
     data = KnowledgeRetrieving.get_people_from_db(room)
@@ -227,11 +236,11 @@ def check_people(room: str):
 
 def check_artwork_symptoms(data):
     artworks = {}
-    ranges = KnowledgeRetrieving.get_all_modes_ranges()
+    ranges = KnowledgeRetrieving.get_danger_threshold()
     for artwork in data:
         values = {}
         room = KnowledgeRetrieving.get_artwork_room(artwork)
-        interval = int(KnowledgeRetrieving.get_range("room" + str(room))) #TODO: da modificare con light range
+        interval = int(KnowledgeRetrieving.get_tollerable_range("light"))
         mode = KnowledgeRetrieving.get_room_mode("room" + str(room))
         # for artwork in data:
         target = int(KnowledgeRetrieving.get_target_thresholds("light"))
@@ -251,6 +260,17 @@ def check_artwork_symptoms(data):
 
         artworks[artwork] = values
     return artworks
+
+
+def illumination():
+    art_illumination = KnowledgeRetrieving.get_illumination_range()
+    start = art_illumination.get("start_hour")
+    end = art_illumination.get("end_hour")
+    current_hour = datetime.now().hour
+    if start < current_hour < end:
+        requests.post(f'{planner_url}/planner/illumination/on')
+    else:
+        requests.post(f'{planner_url}/planner/illumination/off')
 
 
 if __name__ == "__main__":

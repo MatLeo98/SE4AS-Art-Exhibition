@@ -2,6 +2,7 @@ from threading import Thread
 import paho.mqtt.client as mqtt
 from ArtExhibition.constants import mqtt_url
 
+
 class SmokeDetector:
 
     def __init__(self, room):

@@ -4,7 +4,6 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import json
 from ArtExhibition.constants import *
 
-
 client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
 
 
@@ -133,20 +132,13 @@ def get_people_from_db(room):
 def get_target_thresholds(measurement):
     return requests.get(f'{config_url}/config/targets/{measurement}').json()
 
+
 def get_tollerable_range(measurement):
     return requests.get(f'{config_url}/config/ranges/{measurement}').json()
 
 
-def get_range(room):
-    client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
-    query_api = client.query_api()
-    query = f'from(bucket: "artexhibition")  |> range(start: 2023-01-01T15:00:00Z)  ' \
-            f'|> filter(fn: (r) => r["_measurement"] == "rooms")  |> filter(fn: (r) => r["room"] == "{room}")  ' \
-            f'|> filter(fn: (r) => r["_field"] == "range")  |> last(column: "_field")  ' \
-            f'|> yield(name: "mean")'
-    result = query_api.query(org=org, query=query)
-    result = json.loads(result.to_json())[0]['_value']
-    return result
+def get_illumination_range():
+    return requests.get(f'{config_url}/config/illumination').json()
 
 
 def get_room_mode(room):
@@ -162,8 +154,8 @@ def get_room_mode(room):
     return parsed_result
 
 
-def get_all_modes_ranges():
-    return requests.get(f'{config_url}/config/modes').json()
+def get_danger_threshold(measurement: str):
+    return requests.get(f'{config_url}/config/danger/{measurement}').json()
 
 
 def getRoomTemperatureData(room):
@@ -202,28 +194,3 @@ def get_room_people(room):
     result = client.query_api().query(org=org, query=query)
     parsed = json.loads(result.to_json())
     return parsed[0]['_value']
-
-
-# def get_room_time_slots(room: str, timeslot: str):
-#     query_api = client.query_api()
-#     query = f'from(bucket: "seas")  |> range(start: -1d)  ' \
-#             f'|> filter(fn: (r) => r["_measurement"] == "timeSlot")  ' \
-#             f'|> filter(fn: (r) => r["room"] == "{room}")  ' \
-#             f'|> filter(fn: (r) => r["_field"] == "{timeslot}")  ' \
-#             f'|> last(column: "_field")  |> yield(name: "mean")'
-#     result = query_api.query(org=org, query=query)
-#     parsed = json.loads(result.to_json())
-#     return parsed[0]['_value']
-
-
-# def get_room_presence(room):
-#     query = f'from(bucket: "seas") \
-#                 |> range(start: -15m) \
-#                 |> filter(fn: (r) => r["_measurement"] == "indoor") \
-#                 |> filter(fn: (r) => r["_field"] == "movement") \
-#                 |> filter(fn: (r) => r["room"] == "{room}") \
-#                 |> sort(columns: ["_time"], desc: true) \
-#                 |> first()'
-#     result = client.query_api().query(org=org, query=query)
-#     parsed = json.loads(result.to_json())
-#     return parsed[0]['_value']
