@@ -1,10 +1,11 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-from ArtExhibition.constants import mqtt_url
+from constants import mqtt_url
 
 class Shutter:
     def __init__(self, room):
         self.room = room
+        self.height = 50
         self.client = mqtt.Client(client_id=f"Shutter_{room.name}")
         self.client.connect(mqtt_url, 1884)
         self.thread = Thread(target=self.initialize_mqtt)
@@ -28,11 +29,21 @@ class Shutter:
         if room_name == self.room.name:
             if condition == 'up':
                 self.shutter_up()
-            else:
+            elif condition == 'down':
                 self.shutter_down()
+            elif condition == 'max-up':
+                self.shutter_max_opened()
+            elif condition == 'max-down':
+                self.shutter_min_opened()
 
     def shutter_up(self):
-        self.room.window = True
+        self.height = self.height + 10
 
     def shutter_down(self):
-        self.room.window = False
+        self.height = self.height - 10
+
+    def shutter_max_opened(self):
+        self.height = 100
+
+    def shutter_min_opened(self):
+        self.height = 0

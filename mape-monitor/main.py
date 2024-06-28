@@ -1,6 +1,6 @@
 from KnowledgeStore import write
 import paho.mqtt.client as mqtt
-from ArtExhibition.constants import mqtt_url
+from constants import mqtt_url
 
 
 def broker_subscription(client, userdata, flags, rc):

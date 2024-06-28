@@ -1,6 +1,6 @@
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
-from ArtExhibition.constants import *
+from constants import *
 
 
 def write(topic: str, value: int):

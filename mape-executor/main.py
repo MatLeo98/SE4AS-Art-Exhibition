@@ -3,7 +3,7 @@ import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
 import uvicorn
-from ArtExhibition.constants import *
+from constants import *
 
 app = FastAPI()
 mqtt_client = mqtt.Client("executor")

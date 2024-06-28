@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 from Artwork import Artwork
 from Room import Room
 from ModeDefinition import ModeDefinition
-from ArtExhibition.constants import mqtt_url
+from constants import mqtt_url
 
 
 def main():

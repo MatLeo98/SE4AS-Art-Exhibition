@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from typing import Dict
 import uvicorn
-from ArtExhibition.constants import executor_url
+from constants import executor_url
 
 app = FastAPI()
 

@@ -1,6 +1,6 @@
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
-from ArtExhibition.constants import *
+from constants import *
 
 # from tenacity import *
 
@@ -26,8 +26,3 @@ class ModeDefinition:
             value = 1
             p = influxdb_client.Point(measurement).tag("room", tag).field(field, value)
             write_api.write(bucket=bucket, org=org, record=p)
-
-            #TODO: Creare un range per ogni measurement
-            # field = "range"
-            # p = influxdb_client.Point(measurement).tag("room", tag).field(field, value)
-            # write_api.write(bucket=bucket, org=org, record=p)

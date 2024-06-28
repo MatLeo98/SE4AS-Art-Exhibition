@@ -4,7 +4,7 @@ from time import sleep
 import numpy
 import KnowledgeRetrieving
 import requests
-from ArtExhibition.constants import planner_url
+from constants import planner_url
 
 
 def main():
@@ -99,7 +99,7 @@ def check_parameters_symptoms(data):
             # 3 means to deactivate alarm and set mode to eco
 
             print(
-                f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
+                f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval} Danger range: {danger_range}')
 
             process_measurement(actual_value, target, interval, danger_range, values, measurement)
 
@@ -246,7 +246,7 @@ def check_artwork_symptoms(data):
         # 3 means to deactivate alarm and set mode to eco
 
         print(
-            f'\nArtwork: {artwork} Room: room{room}, Mode: {mode}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}')
+            f'\nArtwork: {artwork} Room: room{room}, Mode: {mode}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}, Danger range: {light_danger_range}')
 
         process_measurement(actual_value, target, interval, light_danger_range, values, "light")
 

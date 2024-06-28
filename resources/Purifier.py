@@ -1,11 +1,12 @@
 from threading import Thread
 import paho.mqtt.client as mqtt
-from ArtExhibition.constants import mqtt_url
+from constants import mqtt_url
 
 
 class Purifier:
     def __init__(self, room):
         self.room = room
+        self.power = 50
         self.client = mqtt.Client(client_id=f"Purifier_{room.name}")
         self.client.connect(mqtt_url, 1884)
         self.thread = Thread(target=self.initialize_mqtt)
@@ -29,11 +30,21 @@ class Purifier:
         if room_name == self.room.name:
             if condition == 'up':
                 self.increase_air()
-            else:
+            elif condition == 'down':
                 self.decrease_air()
+            elif condition == 'max-up':
+                self.max_purification()
+            elif condition == 'max-down':
+                self.min_purification()
 
     def increase_air(self):
-        self.room.air = self.room.air + 1
+        self.power = self.power + 10
 
     def decrease_air(self):
-        self.room.air = self.room.air - 1
+        self.power = self.power - 10
+
+    def max_purification(self):
+        self.power = 100
+
+    def min_purification(self):
+        self.power = 0

@@ -1,24 +1,24 @@
 {
-"danger": {
-        "temperature": 5,
-        "light": 20,
-        "humidity": 20,
-        "air": 40
-    },
-"target": {
-    "temperature": 20,
-    "light": 180,
-    "humidity": 40,
-    "air": 50
-    },
-"range": {
-    "temperature": 2,
-    "light": 10,
-    "humidity": 10,
-    "air": 20
-    },
-"illumination": {
-    "start_hour": 19,
-    "end_hour": 6
-}
+    "danger": {
+            "temperature": 5,
+            "light": 20,
+            "humidity": 20,
+            "air": 40
+        },
+    "target": {
+        "temperature": 20,
+        "light": 180,
+        "humidity": 40,
+        "air": 50
+        },
+    "range": {
+        "temperature": 2,
+        "light": 10,
+        "humidity": 10,
+        "air": 20
+        },
+    "illumination": {
+        "start_hour": 19,
+        "end_hour": 6
+    }
 }
