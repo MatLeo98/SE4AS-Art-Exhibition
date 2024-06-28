@@ -81,13 +81,13 @@ def main():
 # calulate the mean of the last 5 minutes for each measured parameter (except the movement) and finds the symptoms
 def check_parameters_symptoms(data):
     rooms = {}
-    ranges = KnowledgeRetrieving.get_danger_threshold()
     for room in data:
         values = {}
         # interval = int(KnowledgeRetrieving.get_range(room=room))
         mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
             interval = int(KnowledgeRetrieving.get_tollerable_range(measurement=measurement))
+            danger_range = int(KnowledgeRetrieving.get_danger_threshold(measurement=measurement))
             target = int(KnowledgeRetrieving.get_target_thresholds(measurement=measurement))
             actual_value = data[room][measurement]
 
@@ -101,13 +101,13 @@ def check_parameters_symptoms(data):
             print(
                 f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval}')
 
-            process_measurement(mode, actual_value, target, interval, ranges, values, measurement)
+            process_measurement(actual_value, target, interval, danger_range, values, measurement)
 
         rooms[room] = values
     return rooms
 
 
-def process_measurement(mode, actual_value, target, interval, ranges, values, measurement):
+def process_measurement(actual_value, target, interval, danger_range, values, measurement):
     def simply_decrease():
         values[measurement] = -1
         print('Simply decrease')
@@ -118,11 +118,11 @@ def process_measurement(mode, actual_value, target, interval, ranges, values, me
 
     def danger_decrease():
         values[measurement] = -2
-        print('Danger, decrease and set mode to power')
+        print('Danger, emergency decrease')
 
     def danger_increase():
         values[measurement] = 2
-        print('Danger, increase and set mode to power')
+        print('Danger, emergency increase')
 
     def smoke_alarm_off():
         values[measurement] = 3
@@ -138,25 +138,17 @@ def process_measurement(mode, actual_value, target, interval, ranges, values, me
         else:
             smoke_alarm_off()
     else:
-        if mode in [0, 1]:  # eco or normal mode
-            if actual_value > target + interval:
-                if actual_value < target + int(ranges['danger']):
-                    simply_decrease()
-                else:
-                    danger_decrease()
-
-            elif actual_value < target - interval:
-                if actual_value > target - int(ranges['danger']):
-                    simply_increase()
-                else:
-                    danger_increase()
-        elif mode == 2:  # power mode
-            if actual_value > target + int(ranges['danger']):
-                print('Power active, simply decrease')
+        if actual_value > target + interval:
+            if actual_value < target + danger_range:
                 simply_decrease()
-            elif actual_value < target - int(ranges['danger']):
-                print('Power active, simply increase')
+            else:
+                danger_decrease()
+
+        elif actual_value < target - interval:
+            if actual_value > target - danger_range:
                 simply_increase()
+            else:
+                danger_increase()
 
 
 def check_busy_time_slot(room):
@@ -236,7 +228,7 @@ def check_people(room: str):
 
 def check_artwork_symptoms(data):
     artworks = {}
-    ranges = KnowledgeRetrieving.get_danger_threshold()
+    light_danger_range = int(KnowledgeRetrieving.get_danger_threshold("light"))
     for artwork in data:
         values = {}
         room = KnowledgeRetrieving.get_artwork_room(artwork)
@@ -256,7 +248,7 @@ def check_artwork_symptoms(data):
         print(
             f'\nArtwork: {artwork} Room: room{room}, Mode: {mode}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}')
 
-        process_measurement(mode, actual_value, target, interval, ranges, values, "light")
+        process_measurement(actual_value, target, interval, light_danger_range, values, "light")
 
         artworks[artwork] = values
     return artworks
