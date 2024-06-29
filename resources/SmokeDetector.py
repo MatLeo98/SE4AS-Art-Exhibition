@@ -5,7 +5,6 @@ from constants import mqtt_url
 
 class SmokeDetector:
 
-    # @retry()
     def __init__(self, room):
         self.room = room
         self.client = mqtt.Client(client_id=f"SmokeDetector_{room.name}")

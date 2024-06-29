@@ -43,12 +43,10 @@ def main():
         print("Rooms measurements:")
         print(parameters_data)
 
-        symptoms = check_parameters_symptoms(parameters_data)
-        print("symptoms:")
-        print(symptoms)
-        # url = 'http://localhost:5007/planner/symptoms'
-        # url = 'http://173.20.0.105:5007/planner/symptoms'
-        # x = requests.post(url, json=symptoms)
+        rooms_symptoms = check_parameters_symptoms(parameters_data)
+        print("rooms symptoms:")
+        print(rooms_symptoms)
+        requests.post(f'{planner_url}/planner/symptoms', json=rooms_symptoms)
 
         artworks = KnowledgeRetrieving.get_artworks_name()
         # artworks = KnowledgeRetrieving.get_artworks()
@@ -69,9 +67,7 @@ def main():
         artwork_symptoms = check_artwork_symptoms(light_data)
         print("artworks symptoms:")
         print(artwork_symptoms)
-        # # url = 'http://localhost:5007/planner/symptoms'
-        # url = 'http://173.20.0.105:5007/planner/symptoms'
-        # x = requests.post(url, json=symptoms)
+        requests.post(f'{planner_url}/planner/symptoms', json=artwork_symptoms)
 
 
     except Exception as exc:

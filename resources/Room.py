@@ -61,4 +61,4 @@ class Room:
         client.publish(f"rooms/{self.name}/people/value", self.people)
         client.publish(f"rooms/{self.name}/smoke/value", self.smoke)
 
-        print(f'Publishing data for {self.name}')
+        print(f'New data published for {self.name}')

@@ -22,4 +22,4 @@ class Artwork:
         client.publish(f"artworks/{self.name}/light/value", self.light)
         client.publish(f"artworks/{self.name}/room/value", self.room)
 
-        print(f'Publishing data for {self.name}')
+        print(f'New data published for {self.name}')

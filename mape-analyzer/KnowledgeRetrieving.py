@@ -130,15 +130,15 @@ def get_people_from_db(room):
 
 
 def get_target_thresholds(measurement):
-    return requests.get(f'{config_url}/config/targets/{measurement}').json()
+    return requests.get(f'{settings_url}/settings/targets/{measurement}').json()
 
 
 def get_tollerable_range(measurement):
-    return requests.get(f'{config_url}/config/ranges/{measurement}').json()
+    return requests.get(f'{settings_url}/settings/ranges/{measurement}').json()
 
 
 def get_illumination_range():
-    return requests.get(f'{config_url}/config/illumination').json()
+    return requests.get(f'{settings_url}/settings/illumination').json()
 
 
 def get_room_mode(room):
@@ -155,7 +155,7 @@ def get_room_mode(room):
 
 
 def get_danger_threshold(measurement: str):
-    return requests.get(f'{config_url}/config/danger/{measurement}').json()
+    return requests.get(f'{settings_url}/settings/danger/{measurement}').json()
 
 
 def getRoomTemperatureData(room):
@@ -178,7 +178,6 @@ def storeTimeSlots(timeSlot: tuple, room: str):
     tag = room
     field = timeSlot[0]
     value = timeSlot[1]
-    # print(f'Field: {field} - Value: {int(value)}')
     p = influxdb_client.Point(measurement).tag('room', tag).field(field, int(value))
     write_api.write(bucket=bucket, org=org, record=p)
 

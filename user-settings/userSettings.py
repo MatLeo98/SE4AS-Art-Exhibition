@@ -5,33 +5,33 @@ import uvicorn
 app = FastAPI()
 
 
-@app.get("/config/danger/{measurement}")
+@app.get("/settings/danger/{measurement}")
 def get_mode(measurement: str):
-    with open('config.prop', 'r') as c:
+    with open('userSettings.prop', 'r') as c:
         return json.loads(c.read())['danger'].get(measurement)
 
 
-@app.get("/config/targets/{measurement}")
+@app.get("/settings/targets/{measurement}")
 def get_target(measurement: str):
-    with open('config.prop', 'r') as c:
+    with open('userSettings.prop', 'r') as c:
         return json.loads(c.read())['target'].get(measurement)
 
 
-@app.get("/config/ranges/{measurement}")
+@app.get("/settings/ranges/{measurement}")
 def get_range(measurement: str):
-    with open('config.prop', 'r') as c:
+    with open('userSettings.prop', 'r') as c:
         return json.loads(c.read())['range'].get(measurement)
 
 
-@app.get("/config/targets")
+@app.get("/settings/targets")
 def get_targets():
-    with open('config.prop', 'r') as c:
+    with open('userSettings.prop', 'r') as c:
         return json.loads(c.read())['target']
 
 
-@app.get("/config/illumination")
+@app.get("/settings/illumination")
 def get_illumination():
-    with open('config.prop', 'r') as c:
+    with open('userSettings.prop', 'r') as c:
         return json.loads(c.read())['illumination']
 
 
