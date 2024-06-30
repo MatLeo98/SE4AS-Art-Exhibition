@@ -2,6 +2,7 @@ from threading import Thread
 import paho.mqtt.client as mqtt
 from constants import mqtt_url
 
+
 class Shutter:
     def __init__(self, room):
         self.room = room
@@ -17,33 +18,33 @@ class Shutter:
         self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe("shutter/#")
+        self.client.subscribe(f"shutter/{self.room.name}/#")
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode("utf-8")
-        topic = msg.topic
-        topic_split = topic.split('/')
-        room_name = topic_split[1]
-        condition = topic_split[2]
+        topic_split = msg.topic.split('/')
+        action = topic_split[2]
 
-        if room_name == self.room.name:
-            if condition == 'up':
-                self.shutter_up()
-            elif condition == 'down':
-                self.shutter_down()
-            elif condition == 'max-up':
-                self.shutter_max_opened()
-            elif condition == 'max-down':
-                self.shutter_min_opened()
+        if action == 'up':
+            self.shutter_up()
+        elif action == 'down':
+            self.shutter_down()
+        elif action == 'max-up':
+            self.shutter_max_opened()
+        elif action == 'max-down':
+            self.shutter_min_opened()
 
     def shutter_up(self):
         self.height = self.height + 10
+        print(f"Shutter for {self.room.name} up.")
 
     def shutter_down(self):
         self.height = self.height - 10
+        print(f"Shutter for {self.room.name} down.")
 
     def shutter_max_opened(self):
         self.height = 100
+        print(f"Shutter for {self.room.name} up to the maximum.")
 
     def shutter_min_opened(self):
         self.height = 0
+        print(f"Shutter for {self.room.name} down to the minimum.")

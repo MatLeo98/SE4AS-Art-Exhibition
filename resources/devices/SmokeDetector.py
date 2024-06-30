@@ -19,16 +19,15 @@ class SmokeDetector:
         self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe("smokeDetector/#")
+        self.client.subscribe(f"smoke-alarm/{self.room.name}/#")
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode("utf-8")
-        topic = msg.topic
-        topic_split = topic.split('/')
-        room_name = topic_split[1]
+        topic_split = msg.topic.split('/')
         condition = topic_split[2]
 
-        if condition == "danger":
+        if condition == "on":
             self.alarm = True
-        else:
+            print(f"Smoke alarm for {self.room.name} turned on.")
+        elif condition == "off":
             self.alarm = False
+            print(f"Smoke alarm for {self.room.name} turned off.")

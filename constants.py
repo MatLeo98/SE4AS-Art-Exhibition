@@ -19,3 +19,5 @@ actions = {
     3: ('smoke-alarm/off', 'Alarm should be deactivated.'),
     -3: ('smoke-alarm/on', 'Alarm should be activated.')
 }
+
+rooms_measurements = ["humidity", "temperature", "air", "smoke"]

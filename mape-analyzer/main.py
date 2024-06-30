@@ -1,101 +1,85 @@
-import traceback
 from datetime import datetime, timedelta
 from time import sleep
 import numpy
 import KnowledgeRetrieving
 import requests
-from constants import planner_url
+from constants import planner_url, rooms_measurements
 
 
-def main():
-    try:
-        rooms = KnowledgeRetrieving.get_rooms_name()
+def artworks_analysis():
+    light_data = {}
+    artworks = KnowledgeRetrieving.get_artworks_name()
 
-        rooms_measurements = ["humidity", "temperature", "air"]
+    for artwork in artworks:
+        light_value = KnowledgeRetrieving.get_artwork_current_light(artwork)
+        light_data[artwork] = light_value
 
-        illumination()
+    print("Artworks light:")
+    print(light_data)
 
-        parameters_data = {}
-        presence_data = {}
-
-        for room in rooms:
-            timeSlots = check_busy_time_slot(room)
-            for timeSlot in timeSlots.items():
-                KnowledgeRetrieving.storeTimeSlots(timeSlot, room)
-            people = check_people(room)
-
-            presence_data[room] = people
-        print("Room modes based on people inside:")
-        print(presence_data)
-
-        requests.post(f'{planner_url}/planner/people', json=presence_data)
-
-        # dictionary of data are organized in this way {room : {measurement : {time : value}}}
-        for room in rooms:
-            room_values = {}
-            for measurement in rooms_measurements:
-                # returns {time : value} of the measurement
-                value = KnowledgeRetrieving.get_room_current(room, measurement)
-                room_values[measurement] = value
-
-            parameters_data[room] = room_values
-
-        print("Rooms measurements:")
-        print(parameters_data)
-
-        rooms_symptoms = check_parameters_symptoms(parameters_data)
-        print("rooms symptoms:")
-        print(rooms_symptoms)
-        requests.post(f'{planner_url}/planner/symptoms', json=rooms_symptoms)
-
-        artworks = KnowledgeRetrieving.get_artworks_name()
-        # artworks = KnowledgeRetrieving.get_artworks()
-        light_data = {}
-
-        for artwork in artworks:
-            # artwork_values = {}
-
-            # returns {time : value} of the measurement
-            light_value = KnowledgeRetrieving.get_artwork_current_light(artwork)
-            # artwork_values["light"] = value
-
-            light_data[artwork] = light_value
-
-        print("Artworks light:")
-        print(light_data)
-
-        artwork_symptoms = check_artwork_symptoms(light_data)
-        print("artworks symptoms:")
-        print(artwork_symptoms)
-        requests.post(f'{planner_url}/planner/symptoms', json=artwork_symptoms)
+    artwork_symptoms = check_artwork_symptoms(light_data)
+    print("artworks symptoms:")
+    print(artwork_symptoms)
+    requests.post(f'{planner_url}/planner/artworks-symptoms', json=artwork_symptoms)
 
 
-    except Exception as exc:
-        traceback.print_exc()
+def rooms_analysis():
+    parameters_data = {}
+    presence_data = {}
+    rooms = KnowledgeRetrieving.get_rooms_name()
+
+    for room in rooms:
+        time_slots = check_busy_time_slot(room)
+        for time_slot in time_slots.items():
+            KnowledgeRetrieving.store_time_slots(time_slot, room)
+        people = check_people(room)
+
+        presence_data[room] = people
+    print("Room modes based on people inside:")
+    print(presence_data)
+
+    requests.post(f'{planner_url}/planner/people', json=presence_data)
+
+    for room in rooms:
+        room_values = {}
+        for measurement in rooms_measurements:
+            value = KnowledgeRetrieving.get_room_current(room, measurement)
+            room_values[measurement] = value
+
+        parameters_data[room] = room_values
+
+    print("Rooms measurements:")
+    print(parameters_data)
+
+    rooms_symptoms = check_parameters_symptoms(parameters_data)
+    print("rooms symptoms:")
+    print(rooms_symptoms)
+    requests.post(f'{planner_url}/planner/rooms-symptoms', json=rooms_symptoms)
 
 
 # calulate the mean of the last 5 minutes for each measured parameter (except the movement) and finds the symptoms
 def check_parameters_symptoms(data):
     rooms = {}
+    interval = 0
+    danger_range = 0
+    target = 0
     for room in data:
         values = {}
-        # interval = int(KnowledgeRetrieving.get_range(room=room))
         mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
-            interval = int(KnowledgeRetrieving.get_tollerable_range(measurement=measurement))
-            danger_range = int(KnowledgeRetrieving.get_danger_threshold(measurement=measurement))
-            target = int(KnowledgeRetrieving.get_target_thresholds(measurement=measurement))
+            if measurement != "smoke":
+                interval = int(KnowledgeRetrieving.get_tollerable_range(measurement=measurement))
+                danger_range = int(KnowledgeRetrieving.get_danger_threshold(measurement=measurement))
+                target = int(KnowledgeRetrieving.get_target_thresholds(measurement=measurement))
             actual_value = data[room][measurement]
 
-            # 2 means to increase the value and set mode to danger
-            # 1 means to increase the value
-            # 0 don't do anything
-            # -1 means to decrease the value
-            # -2 means to decrease the value and set mode to danger
-            # 3 means to deactivate alarm and set mode to eco
-
-            print(
-                f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, Target: {target}+/-{interval} Danger range: {danger_range}')
+            if measurement != "smoke":
+                print(
+                    f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}, '
+                    f'Target: {target}+/-{interval} Danger range: {danger_range}')
+            else:
+                print(
+                    f'\nRoom: {room}, Mode: {mode}, Measurement: {measurement}, Value: {actual_value}')
 
             process_measurement(actual_value, target, interval, danger_range, values, measurement)
 
@@ -122,7 +106,7 @@ def process_measurement(actual_value, target, interval, danger_range, values, me
 
     def smoke_alarm_off():
         values[measurement] = 3
-        print('No more smoke, deactivate smoke alarm')
+        print('No smoke, deactivate smoke alarm')
 
     def smoke_alarm_on():
         values[measurement] = -3
@@ -148,13 +132,13 @@ def process_measurement(actual_value, target, interval, danger_range, values, me
 
 
 def check_busy_time_slot(room):
-    datas = []
+    people = []
     data = KnowledgeRetrieving.get_people_from_db(room)
     for element in data.items():
-        datas.append(element)
+        people.append(element)
 
     parsed_time = dict()
-    for element in datas:
+    for element in people:
         time_string = element[0].split('T')[1].split('.')[0]
         date_obj = datetime.strptime(time_string, '%H:%M:%S')
         parsed_time[str(date_obj.time())] = element[1]
@@ -168,14 +152,13 @@ def check_busy_time_slot(room):
             record_time = datetime.strptime(record[0], '%H:%M:%S')
             if start_time <= record_time < end_time:
                 parsed.append(record[1])
-        value = 0  # Non affollato
-        if parsed:  # Calcola la media solo se ci sono record in questa fascia oraria
+        value = 0  # Not crowded
+        if parsed:  # Calculate the average only if there are records in this time slot
             mean = numpy.mean(parsed)
             if 10 <= mean < 20:
-                value = 1  # Situazione normale
+                value = 1  # Normal situation
             elif mean >= 20:
-                value = 2  # Molto affollato
-        # Overpopulated
+                value = 2  # Very crowded
         fasce_orarie[f'{start_time.time().strftime("%H:%M")} - {end_time.time().strftime("%H:%M")}'] = value
     return fasce_orarie
 
@@ -190,10 +173,6 @@ def check_people(room: str):
         # Adjust hour to the nearest even number for 2-hour time slots
         if current_hour % 2 != 0:
             current_hour -= 1
-
-        time_slot_start = datetime.strptime(f'{current_hour}:00:00', '%H:%M:%S')
-        time_slot_end = time_slot_start + timedelta(hours=2)
-        time_slot = f'{time_slot_start.strftime("%H:%M")} - {time_slot_end.strftime("%H:%M")}'
 
         value = KnowledgeRetrieving.get_room_people(room)
 
@@ -218,7 +197,7 @@ def check_people(room: str):
             print(f'{room}: correct mode already set')
             return mode
 
-    # Se l'ora corrente non è tra le 8 e le 20, setta ad eco perché il museo è chiuso
+    # If the current time is not between 8am and 8pm, set to eco because the museum is closed
     return 0
 
 
@@ -230,23 +209,17 @@ def check_artwork_symptoms(data):
         room = KnowledgeRetrieving.get_artwork_room(artwork)
         interval = int(KnowledgeRetrieving.get_tollerable_range("light"))
         mode = KnowledgeRetrieving.get_room_mode("room" + str(room))
-        # for artwork in data:
         target = int(KnowledgeRetrieving.get_target_thresholds("light"))
         actual_value = data[artwork]
-
-        # 2 means to increase the value and set mode to danger
-        # 1 means to increase the value
-        # 0 don't do anything
-        # -1 means to decrease the value
-        # -2 means to decrease the value and set mode to danger
-        # 3 means to deactivate alarm and set mode to eco
 
         print(
             f'\nArtwork: {artwork} Room: room{room}, Mode: {mode}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}, Danger range: {light_danger_range}')
 
         process_measurement(actual_value, target, interval, light_danger_range, values, "light")
 
+        values['room'] = room
         artworks[artwork] = values
+
     return artworks
 
 
@@ -254,15 +227,15 @@ def illumination():
     art_illumination = KnowledgeRetrieving.get_illumination_range()
     start = art_illumination.get("start_hour")
     end = art_illumination.get("end_hour")
-    current_hour = datetime.now().hour
-    if start < current_hour < end:
+    current_hour = datetime.now().strftime("%H:%M")
+    if current_hour == start:
         requests.post(f'{planner_url}/planner/illumination/on')
-    else:
+    elif current_hour == end:
         requests.post(f'{planner_url}/planner/illumination/off')
 
 
-if __name__ == "__main__":
-
-    while True:
-        main()
-        sleep(10)
+while True:
+    rooms_analysis()
+    artworks_analysis()
+    illumination()
+    sleep(10)

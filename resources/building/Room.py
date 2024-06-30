@@ -3,11 +3,7 @@ from random import randint
 
 from paho.mqtt.client import Client
 
-import Conditioner
-import Dehumidifier
-import SmokeDetector
-import Shutter
-import Purifier
+from resources.devices import Conditioner, Dehumidifier, Purifier, Shutter, SmokeDetector, Lamp
 
 
 class Room:
@@ -15,23 +11,24 @@ class Room:
     temperature = 0
     humidity = 0
     air = 0
-    people = 0
+    people = 10
     smoke = 0
-    window = False
+    shutter = 100
 
-    def __init__(self, name: str, temperature: int, humidity: int, air: int, people: int, smoke: int, window: bool):
+    def __init__(self, name: str, temperature: int, humidity: int, air: int, people: int, smoke: int, shutter: int):
         self.name = name
         self.temperature = temperature
         self.humidity = humidity
         self.air = air
         self.people = people
         self.smoke = smoke
-        self.window = window
+        self.shutter = shutter
         self.devices = [Conditioner.Conditioner(self),
                         Dehumidifier.Dehumidifier(self),
                         SmokeDetector.SmokeDetector(self),
                         Shutter.Shutter(self),
-                        Purifier.Purifier(self)]
+                        Purifier.Purifier(self),
+                        Lamp.Lamp(self)]
 
     def simulate(self, client: Client):
         rand = random.randint(0, 9)

@@ -2,12 +2,13 @@ from threading import Thread
 import paho.mqtt.client as mqtt
 from constants import mqtt_url
 
+
 class Lamp:
 
-    def __init__(self, artwork):
-        self.artwork = artwork
+    def __init__(self, father):
+        self.father = father
         self.switch = 0
-        self.client = mqtt.Client(client_id=f"Lamp_{artwork.name}")
+        self.client = mqtt.Client(client_id=f"Lamp_{father.name}")
         thread = Thread(target=self.initialize_mqtt)
         thread.start()
 
@@ -21,20 +22,18 @@ class Lamp:
         self.client.subscribe("illumination/#")
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode("utf-8")
-        topic = msg.topic
-        topic_split = topic.split('/')
-        room_name = topic_split[1]
-        condition = topic_split[2]
+        topic_split = msg.topic.split('/')
+        action = topic_split[1]
 
-        if room_name == self.artwork.name:
-            if condition == 'on':
-                self.turnOn()
-            else:
-                self.turnOff()
+        if action == 'on':
+            self.turn_on()
+        else:
+            self.turn_off()
 
-    def turnOn(self):
+    def turn_on(self):
         self.switch = 1
+        print(f"Light on for {self.father.name}\n")
 
-    def turnOff(self):
+    def turn_off(self):
         self.switch = 0
+        print(f"Light off for {self.father.name}\n")

@@ -18,7 +18,7 @@
         "air": 20
         },
     "illumination": {
-        "start_hour": 19,
-        "end_hour": 6
+        "start_hour": "17:42",
+        "end_hour": "06:00"
     }
 }

@@ -19,34 +19,35 @@ class Conditioner:
         self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe(f"conditioner/{self.room}/#")
+        self.client.subscribe(f"conditioner/{self.room.name}/#")
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode("utf-8")
-        topic = msg.topic
-        topic_split = topic.split('/')
+        topic_split = msg.topic.split('/')
         room_name = topic_split[1]
-        condition = topic_split[2]
+        action = topic_split[2]
 
         if room_name == self.room.name:
-            if condition == 'up':
-                self.increaseTemperature()
-            elif condition == 'down':
-                self.decreaseTemperature()
-            elif condition == 'max-up':
-                self.maxTemperature()
-            elif condition == 'max-down':
-                self.minTemperature()
+            if action == 'up':
+                self.increase_temperature()
+            elif action == 'down':
+                self.decrease_temperature()
+            elif action == 'max-up':
+                self.max_temperature()
+            elif action == 'max-down':
+                self.min_temperature()
 
-
-    def increaseTemperature(self):
+    def increase_temperature(self):
         self.temperature = self.temperature + 1
+        print(f"Conditioner temperature for {self.room.name} increased.")
 
-    def decreaseTemperature(self):
+    def decrease_temperature(self):
         self.temperature = self.temperature - 1
+        print(f"Conditioner temperature for {self.room.name} decreased.")
 
-    def maxTemperature(self):
+    def max_temperature(self):
         self.temperature = 30
+        print(f"Conditioner temperature for {self.room.name} set to maximum.")
 
-    def minTemperature(self):
+    def min_temperature(self):
         self.temperature = 15
+        print(f"Conditioner temperature for {self.room.name} set to minimum.")

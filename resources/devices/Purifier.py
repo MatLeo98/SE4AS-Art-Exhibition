@@ -18,33 +18,35 @@ class Purifier:
         self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe("purifier/#")
+        self.client.subscribe(f"purifier/{self.room.name}/#")
 
     def on_message(self, client, userdata, msg):
-        payload = msg.payload.decode("utf-8")
-        topic = msg.topic
-        topic_split = topic.split('/')
+        topic_split = msg.topic.split('/')
         room_name = topic_split[1]
-        condition = topic_split[2]
+        action = topic_split[2]
 
         if room_name == self.room.name:
-            if condition == 'up':
+            if action == 'up':
                 self.increase_air()
-            elif condition == 'down':
+            elif action == 'down':
                 self.decrease_air()
-            elif condition == 'max-up':
+            elif action == 'max-up':
                 self.max_purification()
-            elif condition == 'max-down':
+            elif action == 'max-down':
                 self.min_purification()
 
     def increase_air(self):
         self.power = self.power + 10
+        print(f"Purifier power for {self.room.name} increased.")
 
     def decrease_air(self):
         self.power = self.power - 10
+        print(f"Purifier power for {self.room.name} decreased.")
 
     def max_purification(self):
         self.power = 100
+        print(f"Purifier power for {self.room.name} set to maximum.")
 
     def min_purification(self):
         self.power = 0
+        print(f"Purifier power for {self.room.name} set to minimum.")

@@ -6,28 +6,56 @@ from constants import executor_url, actions
 app = FastAPI()
 
 
-@app.post("/planner/symptoms")
-async def check_symptoms(request: Request):
+@app.post("/planner/rooms-symptoms")
+async def rooms_symptoms(request: Request):
     symptoms = await request.json()
+    action_url = ''
+    action_message = ''
 
     for room, measurements in symptoms.items():
-        for measurement, action in measurements.items():
-            print(f'\nRoom: {room}, Measurement: {measurement}, Action: {action}')
+        for measurement, code in measurements.items():
+            print(f'\nRoom: {room}, Measurement: {measurement}, Action: {code}')
 
-            if action in actions:
-                action, message = actions[action]
-                if action == -3:
+            if code in actions:
+                action, message = actions[code]
+                if code == -3:
                     action_url = f'{executor_url}/{room}/smoke-alarm/on'
                     action_message = message.format(measurement=measurement)
-                elif action == 3:
+                elif code == 3:
                     action_url = f'{executor_url}/{room}/smoke-alarm/off'
                     action_message = message.format(measurement=measurement)
                 else:
-                    action_url = f'{executor_url}/{room}/{measurement}/{action}'
+                    if measurement != 'smoke':
+                        action_url = f'{executor_url}/{room}/{measurement}/{action}'
+                        action_message = message.format(measurement=measurement)
+
+                try:
+                    requests.post(action_url)
+                    print(action_message)
+                except Exception as e:
+                    raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "Actions sent to the executor"}
+
+
+@app.post("/planner/artworks-symptoms")
+async def artworks_symptoms(request: Request):
+    symptoms = await request.json()
+    action_url = ''
+    action_message = ''
+
+    for artwork, measurements in symptoms.items():
+        for measurement, code in measurements.items():
+            if measurement == "light":
+                print(f'\nArtwork: {artwork}, Measurement: {measurement}, Action: {code}')
+                artwork = f'{artwork}'
+                if code in actions:
+                    action, message = actions[code]
+                    action_url = f'{executor_url}/room{measurements["room"]}/{measurement}/{action}'
                     action_message = message.format(measurement=measurement)
 
                 try:
-                    requests.get(action_url)
+                    requests.post(action_url)
                     print(action_message)
                 except Exception as e:
                     raise HTTPException(status_code=500, detail=str(e))

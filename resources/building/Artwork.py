@@ -1,7 +1,7 @@
 import random
 from random import randint
 from paho.mqtt.client import Client
-import Lamp
+from resources.devices import Lamp
 
 
 class Artwork:

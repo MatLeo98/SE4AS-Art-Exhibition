@@ -1,5 +1,5 @@
-from Artwork import Artwork
-from Room import Room
+from resources.building.Artwork import Artwork
+from resources.building.Room import Room
 
 
 def instances_definition():
@@ -8,10 +8,10 @@ def instances_definition():
     artworks = []
 
     # Rooms
-    room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10, smoke=0, window=False)
-    room2 = Room(name="room2", temperature=20, humidity=52, air=21, people=10, smoke=0, window=False)
-    room3 = Room(name="room3", temperature=22, humidity=35, air=15, people=10, smoke=0, window=False)
-    room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10, smoke=0, window=False)
+    room1 = Room(name="room1", temperature=22, humidity=50, air=30, people=10, smoke=0, shutter=100)
+    room2 = Room(name="room2", temperature=20, humidity=52, air=21, people=10, smoke=0, shutter=100)
+    room3 = Room(name="room3", temperature=22, humidity=35, air=15, people=10, smoke=0, shutter=100)
+    room4 = Room(name="room4", temperature=27, humidity=51, air=46, people=10, smoke=0, shutter=100)
     rooms.extend([room1, room2, room3, room4])
 
     # Artworks
