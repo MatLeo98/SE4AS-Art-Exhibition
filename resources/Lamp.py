@@ -9,17 +9,16 @@ class Lamp:
         self.father = father
         self.switch = 0
         self.client = mqtt.Client(client_id=f"Lamp_{father.name}")
-        thread = Thread(target=self.initialize_mqtt)
+        thread = Thread(target=self.mqtt_init)
         thread.start()
 
-    def initialize_mqtt(self):
+    def mqtt_init(self):
         self.client.connect(mqtt_url, 1884)
-        self.client.on_connect = self.on_connect
+        self.client.on_connect = lambda _, __, ___, ____: (
+            self.client.subscribe("illumination/#")
+        )
         self.client.on_message = self.on_message
         self.client.loop_forever()
-
-    def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe("illumination/#")
 
     def on_message(self, client, userdata, msg):
         topic_split = msg.topic.split('/')

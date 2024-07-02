@@ -1,7 +1,7 @@
 import requests
 from fastapi import FastAPI, Request, HTTPException
 import uvicorn
-from constants import executor_url, actions
+from constants import actions, executor_url, planner_url, parse_url
 
 app = FastAPI()
 
@@ -83,5 +83,5 @@ async def illumination(action: str):
     requests.post(f'{executor_url}/illumination/{action}')
 
 
-# uvicorn.run(app, host="173.20.0.105", port=5007)
-uvicorn.run(app, host="localhost", port=5007)
+host, port = parse_url(planner_url)
+uvicorn.run(app, host=host, port=port)

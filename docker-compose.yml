@@ -1,0 +1,135 @@
+version: '3.9'
+
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.100
+    ports:
+      - '1884:1884'
+      - '9002:9002'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./grafana/grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=adminpass
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.101
+    depends_on:
+      - mape-knowledge
+
+  mape-knowledge:
+    image: influxdb:latest
+    container_name: mape-knowledge
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminse4as
+      - DOCKER_INFLUXDB_INIT_ORG=univaq
+      - DOCKER_INFLUXDB_INIT_BUCKET=artexhibition
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=m1rcn8P_qoLuUWHyMezmNb8L-dcq2H4YLWT5i87Uhk4IvpLPR9lt8Q576UrRgLowsCE8Yw1mg9KUBWC9ImSIMQ==
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.102
+    ports:
+      - '8086:8086'
+
+  resources:
+    image: resources
+    container_name: resources
+    build:
+      context: ./resources/
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.103
+    depends_on:
+      - mqtt-broker
+
+  mape-monitor:
+    image: mape-monitor
+    container_name: mape-monitor
+    build:
+      context: ./mape-monitor/
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.104
+    depends_on:
+      - mqtt-broker
+      - mape-knowledge
+
+  mape-analyzer:
+    image: mape-analyzer
+    container_name: mape-analyzer
+    build:
+      context: ./mape-analyzer/
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.105
+    depends_on:
+      - mape-knowledge
+      - mape-planner
+
+  mape-planner:
+    image: mape-planner
+    container_name: mape-planner
+    build:
+      context: ./mape-planner/
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.106
+    depends_on:
+      - mape-executor
+
+  mape-executor:
+    image: mape-executor
+    container_name: mape-executor
+    build:
+      context: ./mape-executor/
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.107
+    depends_on:
+      - mqtt-broker
+
+  settings:
+    image: settings
+    container_name: settings
+    build:
+      context: ./user-settings/
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      seas_network:
+        ipv4_address: 175.20.0.108
+    depends_on:
+      - mqtt-broker
+      
+networks:
+  seas_network:
+    ipam:
+      config:
+        - subnet: '175.20.0.0/20'

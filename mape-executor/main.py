@@ -3,10 +3,10 @@ import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
 import uvicorn
-from constants import *
+from constants import bucket, org, token, influx_url, mqtt_url, executor_url, parse_url
 
 app = FastAPI()
-mqtt_client = mqtt.Client("executor")
+mqtt_client = mqtt.Client(client_id="mape-executor")
 mqtt_client.connect(mqtt_url, 1884)
 
 
@@ -64,5 +64,5 @@ async def illumination(action: str):
     return {"message": f"Rooms and artworks illumination turned {action} successfully"}
 
 
-# uvicorn.run(app, host='173.20.0.106', port=5006)
-uvicorn.run(app, host='localhost', port=5006)
+host, port = parse_url(executor_url)
+uvicorn.run(app, host=host, port=port)

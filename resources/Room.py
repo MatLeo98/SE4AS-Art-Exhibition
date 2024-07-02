@@ -1,9 +1,12 @@
 import random
 from random import randint
-
 from paho.mqtt.client import Client
-
-from resources.devices import Conditioner, Dehumidifier, Purifier, Shutter, SmokeDetector, Lamp
+import Conditioner
+import Dehumidifier
+import Lamp
+import Purifier
+import Shutter
+import SmokeDetector
 
 
 class Room:

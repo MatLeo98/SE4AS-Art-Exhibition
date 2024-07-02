@@ -1,5 +1,5 @@
-from resources.building.Artwork import Artwork
-from resources.building.Room import Room
+from Artwork import Artwork
+from Room import Room
 
 
 def instances_definition():

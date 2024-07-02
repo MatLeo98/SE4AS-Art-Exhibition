@@ -2,7 +2,7 @@ import influxdb_client
 import requests
 from influxdb_client.client.write_api import SYNCHRONOUS
 import json
-from constants import *
+from constants import influx_url, token, org, bucket, settings_url
 
 client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
 

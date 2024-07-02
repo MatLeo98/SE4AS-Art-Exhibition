@@ -10,16 +10,15 @@ class SmokeDetector:
         self.client = mqtt.Client(client_id=f"SmokeDetector_{room.name}")
         self.client.connect(mqtt_url, 1884)
         self.alarm = False
-        self.thread = Thread(target=self.initialize_mqtt)
+        self.thread = Thread(target=self.mqtt_init)
         self.thread.start()
 
-    def initialize_mqtt(self):
-        self.client.on_connect = self.on_connect
+    def mqtt_init(self):
+        self.client.on_connect = lambda _, __, ___, ____: (
+            self.client.subscribe(f"smoke-alarm/{self.room.name}/#")
+        )
         self.client.on_message = self.on_message
         self.client.loop_forever()
-
-    def on_connect(self, client, userdata, flags, rc):
-        self.client.subscribe(f"smoke-alarm/{self.room.name}/#")
 
     def on_message(self, client, userdata, msg):
         topic_split = msg.topic.split('/')

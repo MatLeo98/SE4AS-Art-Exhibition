@@ -4,9 +4,9 @@ import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from instances import instances_definition
-from constants import *
+from constants import mqtt_url, influx_url, token, org, bucket
 
-mqtt_client = mqtt.Client("resources", reconnect_on_failure=True)
+mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqtt_client.connect(mqtt_url, 1884)
 influx_client = influxdb_client.InfluxDBClient(url=influx_url, token=token, org=org)
 

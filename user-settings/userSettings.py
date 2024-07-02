@@ -1,6 +1,7 @@
 import json
 from fastapi import FastAPI
 import uvicorn
+from constants import settings_url, parse_url
 
 app = FastAPI()
 
@@ -35,5 +36,5 @@ def get_illumination():
         return json.loads(c.read())['illumination']
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host='localhost', port=5008)
+host, port = parse_url(settings_url)
+uvicorn.run(app, host=host, port=port)

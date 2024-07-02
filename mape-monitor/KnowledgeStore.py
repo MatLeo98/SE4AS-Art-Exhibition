@@ -1,6 +1,6 @@
 import influxdb_client
 from influxdb_client.client.write_api import SYNCHRONOUS
-from constants import *
+from constants import influx_url, token, org, bucket
 
 
 def write(topic: str, value: int):
