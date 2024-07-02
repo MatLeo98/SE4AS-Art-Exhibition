@@ -26,14 +26,17 @@ class Purifier:
         action = topic_split[2]
 
         if room_name == self.room.name:
-            if action == 'up':
-                self.increase_air()
-            elif action == 'down':
-                self.decrease_air()
-            elif action == 'max-up':
-                self.max_purification()
-            elif action == 'max-down':
-                self.min_purification()
+            if action in ["0","1","2"]:
+                self.set_mode(action)
+            else:
+                if action == 'up':
+                    self.increase_air()
+                elif action == 'down':
+                    self.decrease_air()
+                elif action == 'max-up':
+                    self.max_purification()
+                elif action == 'max-down':
+                    self.min_purification()
 
     def increase_air(self):
         self.power = self.power + 10
@@ -50,3 +53,11 @@ class Purifier:
     def min_purification(self):
         self.power = 0
         print(f"Purifier power for {self.room.name} set to minimum.")
+
+    def set_mode(self, mode):
+        if mode == "0":
+            print("Purifier mode set to eco.")
+        elif mode == "1":
+            print("Purifier mode set to normal.")
+        elif mode == "2":
+            print("Purifier mode set to power.")

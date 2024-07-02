@@ -17,6 +17,12 @@ async def mode_change(room: str, value: int):
         write_api = client.write_api(write_options=SYNCHRONOUS)
         record = influxdb_client.Point("rooms").tag("room", room).field("mode", value)
         write_api.write(bucket=bucket, org=org, record=record)
+
+        #change devices mode
+        mqtt_client.publish(f'conditioner/{room}/{value}')
+        mqtt_client.publish(f'dehumidifier/{room}/{value}')
+        mqtt_client.publish(f'purifier/{room}/{value}')
+
         return {"message": "Mode changed successfully"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"{str(e)}, Room not found")

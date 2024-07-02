@@ -26,14 +26,17 @@ class Dehumidifier:
         action = topic_split[2]
 
         if room_name == self.room.name:
-            if action == 'up':
-                self.increase_humidity()
-            elif action == 'down':
-                self.decrease_humidity()
-            elif action == 'max-up':
-                self.max_humidity()
-            elif action == 'max-down':
-                self.min_humidity()
+            if action in ["0","1","2"]:
+                self.set_mode(action)
+            else:
+                if action == 'up':
+                    self.increase_humidity()
+                elif action == 'down':
+                    self.decrease_humidity()
+                elif action == 'max-up':
+                    self.max_humidity()
+                elif action == 'max-down':
+                    self.min_humidity()
 
     def increase_humidity(self):
         self.power = self.power + 10
@@ -50,3 +53,11 @@ class Dehumidifier:
     def min_humidity(self):
         self.power = 0
         print(f"Dehumidifier power for {self.room.name} set to minimum.")
+
+    def set_mode(self, mode):
+        if mode == "0":
+            print("Dehumidifier mode set to eco.")
+        elif mode == "1":
+            print("Dehumidifier mode set to normal.")
+        elif mode == "2":
+            print("Dehumidifier mode set to power.")

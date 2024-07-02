@@ -195,10 +195,13 @@ def check_people(room: str):
             return new_mode
         else:
             print(f'{room}: correct mode already set')
-            return mode
+            return -1
 
     # If the current time is not between 8am and 8pm, set to eco because the museum is closed
-    return 0
+    elif mode != 0:
+        return 0
+    else:
+        return -1
 
 
 def check_artwork_symptoms(data):

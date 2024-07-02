@@ -27,14 +27,17 @@ class Conditioner:
         action = topic_split[2]
 
         if room_name == self.room.name:
-            if action == 'up':
-                self.increase_temperature()
-            elif action == 'down':
-                self.decrease_temperature()
-            elif action == 'max-up':
-                self.max_temperature()
-            elif action == 'max-down':
-                self.min_temperature()
+            if action in ["0","1","2"]:
+                self.set_mode(action)
+            else:
+                if action == 'up':
+                    self.increase_temperature()
+                elif action == 'down':
+                    self.decrease_temperature()
+                elif action == 'max-up':
+                    self.max_temperature()
+                elif action == 'max-down':
+                    self.min_temperature()
 
     def increase_temperature(self):
         self.temperature = self.temperature + 1
@@ -51,3 +54,12 @@ class Conditioner:
     def min_temperature(self):
         self.temperature = 15
         print(f"Conditioner temperature for {self.room.name} set to minimum.")
+
+    def set_mode(self, mode):
+        if mode == "0":
+            print("Conditioner mode set to eco.")
+        elif mode == "1":
+            print("Conditioner mode set to normal.")
+        elif mode == "2":
+            print("Conditioner mode set to power.")
+

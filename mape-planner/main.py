@@ -70,7 +70,8 @@ async def change_mode(request: Request):
 
     try:
         for room in modes:
-            requests.post(f'{executor_url}/mode/{room}/{modes[room]}')
+            if modes[room] != -1:
+                requests.post(f'{executor_url}/mode/{room}/{modes[room]}')
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
