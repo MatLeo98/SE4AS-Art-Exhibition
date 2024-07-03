@@ -37,6 +37,8 @@ async def apply_tactic(room: str, measurement: str, value: str):
     elif measurement == 'air':
         mqtt_client.publish(f'purifier/{room}/{value}')
     elif measurement == 'light':
+        if value == "max-down":
+            mqtt_client.publish(f'illumination/on')
         mqtt_client.publish(f'shutter/{room}/{value}')
 
     return {"message": "Tactic applied successfully"}
