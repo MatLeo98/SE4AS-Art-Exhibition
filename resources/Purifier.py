@@ -29,30 +29,24 @@ class Purifier:
             if action in ["0","1","2"]:
                 self.set_mode(action)
             else:
-                if action == 'up':
-                    self.increase_air()
+                if action == 'up' or action == 'max-up':
+                    self.turn_off()
                 elif action == 'down':
-                    self.decrease_air()
-                elif action == 'max-up':
-                    self.max_purification()
+                    self.purification()
                 elif action == 'max-down':
-                    self.min_purification()
+                    self.max_purification()
 
-    def increase_air(self):
+    def purification(self):
         self.power = self.power + 10
         print(f"Purifier power for {self.room.name} increased.")
 
-    def decrease_air(self):
-        self.power = self.power - 10
-        print(f"Purifier power for {self.room.name} decreased.")
+    def turn_off(self):
+        self.power = 0
+        print(f"Purifier for {self.room.name} turned off.")
 
     def max_purification(self):
         self.power = 100
         print(f"Purifier power for {self.room.name} set to maximum.")
-
-    def min_purification(self):
-        self.power = 0
-        print(f"Purifier power for {self.room.name} set to minimum.")
 
     def set_mode(self, mode):
         if mode == "0":
