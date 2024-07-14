@@ -6,28 +6,39 @@ from constants import settings_url, parse_url
 app = FastAPI()
 
 
-@app.get("/settings/danger/{measurement}")
-def get_mode(measurement: str):
+@app.get("/settings/{room}/danger/{measurement}")
+def get_mode(room: str, measurement: str):
     with open('userSettings.prop', 'r') as c:
-        return json.loads(c.read())['danger'].get(measurement)
+        return json.loads(c.read())['rooms'][room]['danger'].get(measurement)
 
 
-@app.get("/settings/targets/{measurement}")
-def get_target(measurement: str):
+@app.get("/settings/{room}/targets/{measurement}")
+def get_target(room: str, measurement: str):
     with open('userSettings.prop', 'r') as c:
-        return json.loads(c.read())['target'].get(measurement)
+        return json.loads(c.read())['rooms'][room]['target'].get(measurement)
 
 
-@app.get("/settings/ranges/{measurement}")
-def get_range(measurement: str):
+@app.get("/settings/{room}/ranges/{measurement}")
+def get_range(room: str, measurement: str):
     with open('userSettings.prop', 'r') as c:
-        return json.loads(c.read())['range'].get(measurement)
+        return json.loads(c.read())['rooms'][room]['range'].get(measurement)
 
-
-@app.get("/settings/targets")
-def get_targets():
+@app.get("/settings/{artwork}/light/danger")
+def get_artwork_danger_light(artwork: str):
     with open('userSettings.prop', 'r') as c:
-        return json.loads(c.read())['target']
+        return json.loads(c.read())['artworks_light']['danger'].get(artwork)
+
+
+@app.get("/settings/{artwork}/light/target")
+def get_artwork_target_light(artwork: str):
+    with open('userSettings.prop', 'r') as c:
+        return json.loads(c.read())['artworks_light']['target'].get(artwork)
+
+
+@app.get("/settings/{artwork}/light/range")
+def get_artwork_range_light(artwork: str):
+    with open('userSettings.prop', 'r') as c:
+        return json.loads(c.read())['artworks_light']['range'].get(artwork)
 
 
 @app.get("/settings/illumination")

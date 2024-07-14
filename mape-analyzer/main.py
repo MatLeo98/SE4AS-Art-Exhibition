@@ -26,19 +26,26 @@ def artworks_analysis():
 def rooms_analysis():
     parameters_data = {}
     presence_data = {}
+    rooms_history_presence = {}
     rooms = KnowledgeRetrieving.get_rooms_name()
 
     for room in rooms:
         time_slots = check_busy_time_slot(room)
+        rooms_history_presence[room] = time_slots
         for time_slot in time_slots.items():
             KnowledgeRetrieving.store_time_slots(time_slot, room)
-        people = check_people(room)
 
+        people = check_people(room)
         presence_data[room] = people
     print("Room modes based on people inside:")
     print(presence_data)
 
-    requests.post(f'{planner_url}/planner/people', json=presence_data)
+    payload = {
+        "presence_data": presence_data,
+        "rooms_history_presence": rooms_history_presence
+    }
+
+    requests.post(f'{planner_url}/planner/people', json=payload)
 
     for room in rooms:
         room_values = {}
@@ -68,9 +75,9 @@ def check_parameters_symptoms(data):
         mode = KnowledgeRetrieving.get_room_mode(room)
         for measurement in data[room]:
             if measurement != "smoke":
-                interval = int(KnowledgeRetrieving.get_tollerable_range(measurement=measurement))
-                danger_range = int(KnowledgeRetrieving.get_danger_threshold(measurement=measurement))
-                target = int(KnowledgeRetrieving.get_target_thresholds(measurement=measurement))
+                interval = int(KnowledgeRetrieving.get_tollerable_range(room=room, measurement=measurement))
+                danger_range = int(KnowledgeRetrieving.get_danger_threshold(room=room, measurement=measurement))
+                target = int(KnowledgeRetrieving.get_target_thresholds(room=room, measurement=measurement))
             actual_value = data[room][measurement]
 
             if measurement != "smoke":
@@ -206,17 +213,16 @@ def check_people(room: str):
 
 def check_artwork_symptoms(data):
     artworks = {}
-    light_danger_range = int(KnowledgeRetrieving.get_danger_threshold("light"))
     for artwork in data:
         values = {}
         room = KnowledgeRetrieving.get_artwork_room(artwork)
-        interval = int(KnowledgeRetrieving.get_tollerable_range("light"))
-        mode = KnowledgeRetrieving.get_room_mode("room" + str(room))
-        target = int(KnowledgeRetrieving.get_target_thresholds("light"))
+        light_danger_range = int(KnowledgeRetrieving.get_artwork_light_danger_threshold(artwork))
+        interval = int(KnowledgeRetrieving.get_artwork_light_range(artwork))
+        target = int(KnowledgeRetrieving.get_artwork_light_target(artwork))
         actual_value = data[artwork]
 
         print(
-            f'\nArtwork: {artwork} Room: room{room}, Mode: {mode}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}, Danger range: {light_danger_range}')
+            f'\nArtwork: {artwork} Room: room{room}, Measurement: light, Value: {actual_value}, Target: {target}+/-{interval}, Danger range: {light_danger_range}')
 
         process_measurement(actual_value, target, interval, light_danger_range, values, "light")
 

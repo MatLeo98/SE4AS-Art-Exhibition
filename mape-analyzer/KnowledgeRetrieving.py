@@ -92,12 +92,12 @@ def get_people_from_db(room):
     return values
 
 
-def get_target_thresholds(measurement):
-    return requests.get(f'{settings_url}/settings/targets/{measurement}').json()
+def get_target_thresholds(room, measurement):
+    return requests.get(f'{settings_url}/settings/{room}/targets/{measurement}').json()
 
 
-def get_tollerable_range(measurement):
-    return requests.get(f'{settings_url}/settings/ranges/{measurement}').json()
+def get_tollerable_range(room, measurement):
+    return requests.get(f'{settings_url}/settings/{room}/ranges/{measurement}').json()
 
 
 def get_illumination_range():
@@ -117,8 +117,17 @@ def get_room_mode(room):
     return parsed_result
 
 
-def get_danger_threshold(measurement: str):
-    return requests.get(f'{settings_url}/settings/danger/{measurement}').json()
+def get_danger_threshold(room:str, measurement: str):
+    return requests.get(f'{settings_url}/settings/{room}/danger/{measurement}').json()
+
+def get_artwork_light_danger_threshold(artwork:str):
+    return requests.get(f'{settings_url}/settings/{artwork}/light/danger').json()
+
+def get_artwork_light_target(artwork:str):
+    return requests.get(f'{settings_url}/settings/{artwork}/light/target').json()
+
+def get_artwork_light_range(artwork:str):
+    return requests.get(f'{settings_url}/settings/{artwork}/light/range').json()
 
 
 def store_time_slots(time_slot: tuple, room: str):

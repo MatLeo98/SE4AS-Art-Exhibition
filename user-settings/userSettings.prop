@@ -1,24 +1,116 @@
 {
-    "danger": {
-            "temperature": 5,
-            "light": 20,
-            "humidity": 20,
-            "air": 40
+    "rooms": {
+        "room1": {
+            "danger": {
+                "temperature": 5,
+                "humidity": 20,
+                "air": 40
+            },
+            "target": {
+                "temperature": 20,
+                "humidity": 40,
+                "air": 50
+            },
+            "range": {
+                "temperature": 2,
+                "humidity": 10,
+                "air": 20
+            }
         },
-    "target": {
-        "temperature": 20,
-        "light": 180,
-        "humidity": 40,
-        "air": 50
+        "room2": {
+            "danger": {
+                "temperature": 6,
+                "humidity": 22,
+                "air": 45
+            },
+            "target": {
+                "temperature": 21,
+                "humidity": 42,
+                "air": 55
+            },
+            "range": {
+                "temperature": 3,
+                "humidity": 12,
+                "air": 22
+            }
         },
-    "range": {
-        "temperature": 2,
-        "light": 10,
-        "humidity": 10,
-        "air": 20
+        "room3": {
+            "danger": {
+                "temperature": 6,
+                "humidity": 22,
+                "air": 45
+            },
+            "target": {
+                "temperature": 21,
+                "humidity": 42,
+                "air": 55
+            },
+            "range": {
+                "temperature": 3,
+                "humidity": 12,
+                "air": 22
+            }
         },
+        "room4": {
+            "danger": {
+                "temperature": 6,
+                "humidity": 22,
+                "air": 45
+            },
+            "target": {
+                "temperature": 21,
+                "humidity": 42,
+                "air": 55
+            },
+            "range": {
+                "temperature": 3,
+                "humidity": 12,
+                "air": 22
+            }
+        },
+        "room5": {
+            "danger": {
+                "temperature": 6,
+                "humidity": 22,
+                "air": 45
+            },
+            "target": {
+                "temperature": 21,
+                "humidity": 42,
+                "air": 55
+            },
+            "range": {
+                "temperature": 3,
+                "humidity": 12,
+                "air": 22
+            }
+        }
+    },
+    "artworks_light": {
+            "danger": {
+                "Guernica": 20,
+                "LaPersistenzaDellaMemoria": 21,
+                "NewYorkCity1": 22,
+                "Gioconda": 23,
+                "UrloDiMunch": 24
+            },
+            "target": {
+                "Guernica": 180,
+                "LaPersistenzaDellaMemoria": 170,
+                "NewYorkCity1": 175,
+                "Gioconda": 182,
+                "UrloDiMunch": 180
+            },
+            "range": {
+                "Guernica": 10,
+                "LaPersistenzaDellaMemoria": 11,
+                "NewYorkCity1": 12,
+                "Gioconda": 13,
+                "UrloDiMunch": 9
+            }
+    },
     "illumination": {
-        "start_hour": "17:42",
-        "end_hour": "06:00"
+        "start_hour": "18:00",
+        "end_hour": "07:00"
     }
 }
